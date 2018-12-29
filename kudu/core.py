@@ -21,8 +21,7 @@ from git import InvalidGitRepositoryError, Repo
 from kudu import ExitStatus, logger, files
 from kudu.backend import Backend
 from kudu.cli import parser
-from kudu.config import InvalidConfig
-from kudu.exceptions import FileNotFound, ConfigNotFound, InvalidPath, InvalidAuth
+from kudu.exceptions import FileNotFound, ConfigNotFound, InvalidPath, InvalidAuth, BranchNotPermitted
 
 CONFIG = '.kudu.yml'
 
@@ -62,14 +61,19 @@ def push(args, backend):
 
 def deploy(args, backend):
     proj_dir = os.path.abspath(args.path)
-    deployment_path = None
+    target_path = None
 
     while proj_dir != '/' and not os.path.exists(os.path.join(proj_dir, CONFIG)):
         proj_dir = os.path.dirname(proj_dir)
-        deployment_path = os.path.relpath(args.path, proj_dir)
+        target_path = os.path.relpath(args.path, proj_dir)
 
     if proj_dir == '/':
         raise ConfigNotFound()
+
+    try:
+        active_branch = str(Repo(proj_dir).active_branch)
+    except InvalidGitRepositoryError:
+        active_branch = None
 
     save_cwd = os.getcwd()
     os.chdir(proj_dir)
@@ -82,64 +86,19 @@ def deploy(args, backend):
                 deployments = [deployments]
 
             for deployment in deployments:
-                if isinstance(deployment['id'], dict):
-                    active_branch = str(Repo(proj_dir).active_branch)
 
-                    if active_branch not in deployment['id']:
-                        logger.log('Skipping a deployment because this branch is not permitted: %s' % active_branch)
-                        continue
-
-                    deployment['id'] = deployment['id'][active_branch]
-
+                # apply defaults
                 if 'path' not in deployment:
-                    deployment['path'] = proj_dir
+                    deployment['path'] = '.'
 
-                if deployment_path and deployment_path != deployment['path']:
+                # filter
+                if target_path and target_path != deployment['path']:
                     continue
 
-                if 'thumbnail' not in deployment:
-                    deployment['thumbnail'] = 'thumbnail.png'
-
-                file_data = files.get_file(backend, deployment['id'])
-                file_upload = deployment['path']
-
-                if os.path.isdir(deployment['path']):
-                    target_basename = file_data['filename']
-                    target_filename = os.path.splitext(target_basename)[0]
-                    target_path = os.path.join('..', target_filename)
-                    target_thumb = target_filename + '.png'
-
-                    if os.path.exists(deployment['thumbnail']):
-                        os.rename(deployment['thumbnail'], target_thumb)
-
-                    try:
-                        logger.log('Create %s' % target_basename)
-
-                        file_upload = os.path.join(tempfile.tempdir, target_filename)
-
-                        os.rename(deployment['path'], target_path)
-                        shutil.make_archive(file_upload, 'zip', '..', target_filename)
-
-                        file_upload += '.zip'
-                    finally:
-                        os.rename(target_path, deployment['path'])
-
-                        if os.path.exists(target_thumb):
-                            os.rename(target_thumb, deployment['thumbnail'])
-
-                logger.log('Upload file %s' % file_data['id'])
-
-                files.upload_file(backend, file_data['id'], file_upload)
-
-                files.save_file(
-                    backend, file_data['id'],
-                    body=deployment.get('body'),
-                    keywords=deployment.get('keywords'),
-                    creation_time=datetime.utcnow().isoformat()
-                )
-
-                if os.path.isdir(deployment['path']):
-                    os.remove(file_upload)
+                try:
+                    files.deploy_file(backend, deployment, active_branch)
+                except BranchNotPermitted as e:
+                    logger.log(e.message)
     finally:
         os.chdir(save_cwd)
 
@@ -189,10 +148,6 @@ def main(args=sys.argv[1:]):
 
     except ConfigNotFound:
         logger.error('fatal: no %s found in the current or any of the parent directories' % CONFIG)
-        exit_status = ExitStatus.ERROR
-
-    except InvalidConfig as e:
-        logger.error('config: %s.' % e.message)
         exit_status = ExitStatus.ERROR
 
     except InvalidGitRepositoryError:

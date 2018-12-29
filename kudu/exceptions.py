@@ -20,3 +20,7 @@ class FileNotFound(Exception):
 
 class ConfigNotFound(Exception):
     pass
+
+
+class BranchNotPermitted(Exception):
+    pass
