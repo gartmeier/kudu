@@ -1,4 +1,3 @@
-import getpass
 import os
 from argparse import ArgumentParser, Namespace
 
@@ -19,13 +18,5 @@ class KuduArgumentParser(ArgumentParser):
 
         if not os.path.exists(self.args.path):
             raise InvalidPath()
-
-        if self.args.login:
-            backend.remove_token()
-
-        if not backend.restore_token():
-            username = raw_input("Username for %s: " % backend.url)
-            password = getpass.getpass("Password for %s: " % backend.url)
-            backend.authenticate(username, password)
 
         return self.args

@@ -8,97 +8,57 @@ Invocation flow:
   5. Exit.
 
 """
+import logging
 import os
-import shutil
 import sys
-import tempfile
-from datetime import datetime
 
 import requests
-import yaml
 from git import InvalidGitRepositoryError, Repo
 
-from kudu import ExitStatus, logger, files
-from kudu.backend import Backend
+from kudu import ExitStatus
 from kudu.cli import parser
-from kudu.exceptions import FileNotFound, ConfigNotFound, InvalidPath, InvalidAuth, BranchNotPermitted
+from kudu.config import parse_deployments
+from kudu.exceptions import InvalidPath, InvalidAuth, UnknownProvider, ConfigError, ConnectionError
+from kudu.providers.pitcher import PitcherFileProvider
 
-CONFIG = '.kudu.yml'
+CONFIG_FILE = '.kudu.yml'
 
 
-def push(args, backend):
-    filename = os.path.basename(args.path)
+def push(args, logger):
+    filename = os.path.basename(os.path.abspath(args.path))
 
     if os.path.isdir(args.path):
         filename += '.zip'
 
-    res = files.get_files(backend, filename=filename)
-
-    if len(res) == 0:
-        raise FileNotFound('invalid filename \'{filename}\''.format(filename=filename))
-
-    for file_data in res:
-        upload_path = args.path
-
-        if os.path.isdir(args.path):
-            root_dir = os.path.dirname(args.path)
-            base_dir = os.path.basename(args.path)
-            zip_dir = os.path.join(tempfile.tempdir, base_dir)
-
-            logger.log('Create archive: %s' % filename)
-            shutil.make_archive(zip_dir, 'zip', root_dir, base_dir)
-
-            upload_path = zip_dir + '.zip'
-
-        logger.log('Upload to file: %s' % file_data['id'])
-
-        files.upload_file(backend, file_data['id'], upload_path)
-        files.save_file(backend, file_data['id'], creation_time=datetime.utcnow().isoformat())
-
-        if os.path.isdir(args.path):
-            os.remove(upload_path)
+    provider = PitcherFileProvider()
+    provider.push(filename, args.path, logger=logger)
 
 
-def deploy(args, backend):
-    proj_dir = os.path.abspath(args.path)
-    target_path = None
+def deploy(args, logger):
+    root_dir = os.path.abspath(args.path)
+    base_dir = os.curdir
 
-    while proj_dir != '/' and not os.path.exists(os.path.join(proj_dir, CONFIG)):
-        proj_dir = os.path.dirname(proj_dir)
-        target_path = os.path.relpath(args.path, proj_dir)
+    while root_dir != '/' and not os.path.exists(os.path.join(root_dir, CONFIG_FILE)):
+        root_dir = os.path.dirname(root_dir)
+        base_dir = os.path.relpath(args.path, root_dir)
 
-    if proj_dir == '/':
-        raise ConfigNotFound()
-
-    try:
-        active_branch = str(Repo(proj_dir).active_branch)
-    except InvalidGitRepositoryError:
-        active_branch = None
+    if root_dir == '/':
+        raise ConfigError('file \'%s\' not found in the current or any of the parent directories' % CONFIG_FILE)
 
     save_cwd = os.getcwd()
-    os.chdir(proj_dir)
+    os.chdir(root_dir)
 
     try:
-        with open(os.path.join(proj_dir, CONFIG), 'r') as stream:
-            deployments = yaml.load(stream)
+        try:
+            active_branch = str(Repo().active_branch)
+        except InvalidGitRepositoryError:
+            active_branch = None
 
-            if isinstance(deployments, dict):
-                deployments = [deployments]
+        deployments = parse_deployments(CONFIG_FILE, base_dir, active_branch, logger)
 
-            for deployment in deployments:
-
-                # apply defaults
-                if 'path' not in deployment:
-                    deployment['path'] = '.'
-
-                # filter
-                if target_path and target_path != deployment['path']:
-                    continue
-
-                try:
-                    files.deploy_file(backend, deployment, active_branch)
-                except BranchNotPermitted as e:
-                    logger.log(e.message)
+        for i, deployment in enumerate(deployments):
+            logging.info('Deploying %d/%d' % (i + 1, len(deployments)))
+            deployment.deploy()
     finally:
         os.chdir(save_cwd)
 
@@ -108,15 +68,16 @@ def main(args=sys.argv[1:]):
     Validate args and run the command with error handling.
 
     """
+    logging.basicConfig(stream=sys.stdout, format='%(message)s', level=logging.INFO)
+    logger = logging.getLogger()
 
     exit_status = ExitStatus.SUCCESS
 
     try:
-        backend = Backend()
-        parsed_args = parser.parse_args(args=args, backend=backend)
+        parsed_args = parser.parse_args(args=args)
 
         commands = {'push': push, 'deploy': deploy}
-        commands[parsed_args.command](args=parsed_args, backend=backend)
+        commands[parsed_args.command](args=parsed_args, logger=logger)
 
     except KeyboardInterrupt:
         logger.error('')
@@ -126,8 +87,16 @@ def main(args=sys.argv[1:]):
         logger.error('')
         exit_status = ExitStatus.ERROR
 
+    except ConfigError as e:
+        logger.error(e)
+        exit_status = ExitStatus.ERROR
+
     except requests.ConnectionError:
         logger.error('Connection failed')
+        exit_status = ExitStatus.ERROR
+
+    except ConnectionError as e:
+        logger.error(e)
         exit_status = ExitStatus.ERROR
 
     except requests.Timeout:
@@ -146,12 +115,12 @@ def main(args=sys.argv[1:]):
         logger.error(e.message)
         exit_status = ExitStatus.ERROR
 
-    except ConfigNotFound:
-        logger.error('fatal: no %s found in the current or any of the parent directories' % CONFIG)
-        exit_status = ExitStatus.ERROR
-
     except InvalidGitRepositoryError:
         logger.error('git: not a repository')
+        exit_status = ExitStatus.ERROR
+
+    except UnknownProvider as e:
+        logger.error(e)
         exit_status = ExitStatus.ERROR
 
     return exit_status

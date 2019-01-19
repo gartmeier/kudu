@@ -11,6 +11,7 @@ pytest = "*"
 mock = "*"
 pyyaml = "*"
 gitpython = "*"
+paramiko = "*"
 
 [dev-packages]
 

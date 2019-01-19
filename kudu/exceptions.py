@@ -1,26 +1,43 @@
-class InvalidPath(Exception):
+class KuduException(Exception):
+    def __str__(self):
+        return '%s: %s' % (type(self).__name__, self.message)
+
+
+class InvalidPath(KuduException):
     pass
 
 
-class InvalidAuth(Exception):
+class InvalidAuth(KuduException):
     pass
 
 
-class NotFound(Exception):
+class NotFound(KuduException):
     pass
 
 
-class NotAuthorized(Exception):
+class NotAuthorized(KuduException):
     pass
 
 
-class FileNotFound(Exception):
+class FileNotFound(KuduException):
     pass
 
 
-class ConfigNotFound(Exception):
+class ConfigError(KuduException):
     pass
 
 
-class BranchNotPermitted(Exception):
+class UnknownProvider(KuduException):
+    pass
+
+
+class BranchNotPermitted(KuduException):
+    pass
+
+
+class PathNotPermitted(KuduException):
+    pass
+
+
+class ConnectionError(KuduException):
     pass
