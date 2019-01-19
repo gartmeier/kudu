@@ -73,7 +73,7 @@ def _res(res):
 class PitcherFileProvider(object):
     name = 'pitcherfile'
 
-    api_url = 'http://0.0.0.0:8000'
+    api_url = 'https://nyala.pitcher.com'
     api_token = None
 
     def push(self, file_filename, file_path, logger=None):
