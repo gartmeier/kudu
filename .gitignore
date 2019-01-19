@@ -1,1 +1,3 @@
 .idea/
+kudu.egg-info
+*.pyc
