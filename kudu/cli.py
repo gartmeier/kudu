@@ -14,7 +14,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--path',
+    'path',
     nargs=OPTIONAL,
     default='.'
 )
