@@ -16,7 +16,6 @@ def parse_deployments(config_file, base_dir, active_branch, logger):
 
         for config in configs:
             try:
-
                 provider_name = config.pop('provider', 'pitcherfile')
                 deployment = None
 

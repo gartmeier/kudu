@@ -23,3 +23,8 @@ parser.add_argument(
     '--login',
     action='store_true'
 )
+
+parser.add_argument(
+    '--parallels',
+    action='store_true'
+)

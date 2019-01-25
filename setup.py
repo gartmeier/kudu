@@ -7,7 +7,8 @@ import kudu
 install_requires = [
     'requests>=2.21.0',
     'GitPython>=2.1.11',
-    'paramiko>=2.4.2'
+    'paramiko>=2.4.2',
+    'watchdog>=0.9.0'
 ]
 
 # bdist_wheel
