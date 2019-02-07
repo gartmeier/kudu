@@ -126,7 +126,7 @@ def sync_dir(source, target, logger, **kwargs):
 
         copyfile(src, dst)
 
-        if 'scripts' in kwargs \
+        if kwargs.get('scripts') \
                 and len(kwargs['scripts']) > 0 \
                 and os.path.splitext(dst)[1] == '.html':
             add_scripts(dst, kwargs['scripts'])
@@ -242,7 +242,7 @@ def link(args, logger, vorlon_url=None):
 
     if isinstance(file_id, dict):
         try:
-            active_branch = str(Repo().active_branch)
+            active_branch = str(Repo(root_dir).active_branch)
         except InvalidGitRepositoryError:
             active_branch = None
 
