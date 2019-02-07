@@ -1,37 +1,36 @@
-# This is purely the result of trial and error.
+from setuptools import setup
 
-from setuptools import setup, find_packages
-
-import kudu
-
-install_requires = [
-    'requests>=2.21.0',
-    'GitPython>=2.1.11',
-    'paramiko>=2.4.2',
-    'watchdog>=0.9.0'
-]
-
-# bdist_wheel
-extras_require = {
-    # http://wheel.readthedocs.io/en/latest/#defining-conditional-dependencies
-    'python_version == "3.0" or python_version == "3.1"': ['argparse>=1.2.1'],
-}
-
-
-def long_description():
-    return ''
-
+from kudu import __author__
+from kudu import __email__
+from kudu import __version__
 
 setup(
     name='kudu',
-    version=kudu.__version__,
-    author=kudu.__author__,
-    packages=find_packages(),
+    version=__version__,
+    description='A deployment command line program in Python.',
+    url='https://github.com/torfeld6/kudu-cli',
+    author=__author__,
+    author_email=__email__,
+    license='BSD',
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Topic :: Utilities',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+    ],
+    keywords='cli',
+    install_requires=['requests', 'PyYAML', 'GitPython', 'watchdog', 'click'],
     entry_points={
         'console_scripts': [
             'kudu = kudu.__main__:main',
         ],
     },
-    extras_require=extras_require,
-    install_requires=install_requires
 )
