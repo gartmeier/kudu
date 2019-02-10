@@ -33,9 +33,8 @@ def cli(ctx, username, password, token):
 
 
 cli.add_command(init)
-cli.add_command(push)
 cli.add_command(pull)
-cli.add_command(deploy)
+cli.add_command(push)
 cli.add_command(link)
 
 if __name__ == '__main__':
