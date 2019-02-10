@@ -6,6 +6,9 @@ from kudu.api import request as api_request
 class PitcherFile(click.ParamType):
     name = 'pitcher-file'
 
+    def __init__(self, category=None):
+        self.category = category
+
     def convert(self, value, param, ctx):
         if not isinstance(value, int) and not value.isdigit():
             self.fail('%d is not a valid integer' % value, param, ctx)
@@ -14,4 +17,8 @@ class PitcherFile(click.ParamType):
         if res.status_code != 200:
             self.fail('%d is not a valid file' % value)
 
-        return res.json()
+        data = res.json()
+        if self.category and data.get('category') != self.category:
+            self.fail('%d is not of a valid file category' % value)
+
+        return data
