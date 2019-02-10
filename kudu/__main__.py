@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+import os
 from os.path import expanduser
 
 import anyconfig
 import click
 
 from kudu.api import authenticate
-from kudu.commands.deploy import deploy
 from kudu.commands.init import init
 from kudu.commands.link import link
 from kudu.commands.pull import pull
@@ -38,4 +38,14 @@ cli.add_command(push)
 cli.add_command(link)
 
 if __name__ == '__main__':
-    cli(default_map=anyconfig.load([expanduser('~/.kudu.yml'), '.kudu.yml']))
+    config_files = []
+
+    global_config_file = expanduser('~/.kudu.yml')
+    if os.path.exists(global_config_file):
+        config_files.append(global_config_file)
+
+    config_file = '.kudu.yml'
+    if os.path.exists(config_file):
+        config_files.append(config_file)
+
+    cli(default_map=anyconfig.load(config_files))
