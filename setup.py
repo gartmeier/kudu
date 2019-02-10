@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords='cli',
-    install_requires=['requests', 'PyYAML', 'GitPython', 'watchdog', 'click'],
+    install_requires=['requests', 'PyYAML', 'GitPython', 'watchdog', 'click', 'anyconfig'],
     entry_points={
         'console_scripts': [
             'kudu = kudu.__main__:main',
