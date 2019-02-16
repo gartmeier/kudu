@@ -17,7 +17,7 @@ class PitcherFileType(IntParamType):
             self.fail('%d is not a valid file' % value)
 
         data = res.json()
-        if self.category and data.get('category') != self.category:
+        if self.category and data.get('category') not in self.category:
             self.fail('%d is not of a valid file category' % value)
 
         return data

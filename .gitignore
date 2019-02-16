@@ -2,3 +2,5 @@
 kudu.egg-info
 *.pyc
 kudu.iml
+htmlcov
+.coverage
