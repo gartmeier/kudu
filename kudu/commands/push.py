@@ -7,11 +7,11 @@ import click
 import requests
 
 from kudu.api import request as api_request
-from kudu.params import PitcherFile
+from kudu.types import PitcherFileType
 
 
 @click.command()
-@click.option('--file', '-f', 'pfile', type=PitcherFile(category='zip'))
+@click.option('--file', '-f', 'pfile', type=PitcherFileType(category='zip'))
 @click.pass_context
 def push(ctx, pfile):
     chroot, ext = os.path.splitext(pfile['filename'])

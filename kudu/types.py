@@ -1,17 +1,16 @@
-import click
+from click.types import IntParamType
 
 from kudu.api import request as api_request
 
 
-class PitcherFile(click.ParamType):
+class PitcherFileType(IntParamType):
     name = 'pitcher-file'
 
     def __init__(self, category=None):
         self.category = category
 
     def convert(self, value, param, ctx):
-        if not isinstance(value, int) and not value.isdigit():
-            self.fail('%d is not a valid integer' % value, param, ctx)
+        value = super(PitcherFileType, self).convert(value, param, ctx)
 
         res = api_request('get', '/files/%d/' % value, token=ctx.obj['token'])
         if res.status_code != 200:
