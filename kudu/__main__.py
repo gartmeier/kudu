@@ -14,7 +14,7 @@ from kudu.commands.push import push
 
 @click.group()
 @click.option('--username', prompt=True, envvar='KUDU_USERNAME')
-@click.option('--password', prompt=True, envvar='KUDU_PASSWORD')
+@click.option('--password', prompt=True, hide_input=True, envvar='KUDU_PASSWORD')
 @click.option('--token', envvar='KUDU_TOKEN')
 @click.pass_context
 def cli(ctx, username, password, token):
