@@ -11,7 +11,7 @@ from kudu.types import PitcherFileType
 
 
 @click.command()
-@click.option('--file', '-f', 'pfile', prompt=True, type=PitcherFileType())
+@click.option('--file', '-f', 'pfile', prompt='File ID', type=PitcherFileType())
 @click.pass_context
 def pull(ctx, pfile):
     download_url = api_request('get', '/files/%d/download-url/' % pfile['id'], token=ctx.obj['token']).json()
