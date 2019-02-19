@@ -1,32 +1,18 @@
-import os
-
 import click
 
-from kudu.api import authenticate, request
-from kudu.config import write_global_config, write_config
+from kudu.api import request
+from kudu.config import write_config
 
 
 @click.command()
-@click.option('--path', default=os.getcwd(), type=click.Path(exists=True))
-def init(path):
-    username = click.prompt('Username for https://api.pitcher.com')
-    password = click.prompt('Password for https://api.pitcher.com', hide_input=True)
-    token = None
-
-    try:
-        token = authenticate(username, password)
-    except ValueError:
-        click.echo('Invalid username or password', err=True)
-        exit(1)
-
-    write_global_config({'username': username, 'password': password})
-
+@click.pass_context
+def init(ctx):
     if click.confirm('Would you like to create a new file?'):
-        file_id = create_file(token)
+        file_id = create_file(ctx.obj['token'])
     else:
-        file_id = validate_file(click.prompt('File ID', type=int), token)
+        file_id = validate_file(click.prompt('File ID', type=int), ctx.obj['token'])
 
-    write_config({'id': file_id}, path=path)
+    write_config({'file_id': file_id})
 
 
 def create_file(token):
