@@ -44,7 +44,11 @@ def validate_file(file_id, token):
     api_res = request('get', '/files/%d/' % file_id, token=token)
 
     if api_res.status_code != 200:
-        click.echo('Invalid File', err=True)
+        click.echo('Invalid file', err=True)
+        exit(1)
+
+    if api_res.json().get('category') not in ('zip', 'presentation', ''):
+        click.echo('Invalid category', err=True)
         exit(1)
 
     return file_id
