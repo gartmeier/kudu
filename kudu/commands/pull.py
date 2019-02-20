@@ -1,13 +1,31 @@
+import os
 import zipfile
-from os import remove, listdir
-from os.path import splitext, join, exists, isdir
-from shutil import copyfileobj, move
+from macostools import mkdirs
+from os import remove, walk
+from os.path import splitext, join, exists, isdir, relpath
+from shutil import copyfileobj, move, rmtree
 
 import click
 import requests
 
 from kudu.api import request as api_request
 from kudu.types import PitcherFileType
+
+
+def move_dir(src, dst):
+    for root, dirs, files in walk(src):
+        for name in files:
+            arcroot = join(dst, relpath(root, src))
+            if not exists(arcroot):
+                mkdirs(arcroot)
+            move(join(root, name), join(arcroot, name))
+    rmtree(src)
+
+
+def move_thumb(root):
+    filename = root + '.png'
+    if exists(filename):
+        move(filename, 'thumbnail.png')
 
 
 @click.command()
@@ -27,9 +45,5 @@ def pull(ctx, pfile):
         remove(pfile['filename'])
 
         if exists('.kudu.yml') and isdir(root):
-            for filename in listdir(root):
-                move(join(root, filename), filename)
-
-            thumbnail = root + '.png'
-            if exists(thumbnail):
-                move(thumbnail, 'thumbnail.png')
+            move_dir(root, os.curdir if pfile['category'] else 'interface')
+            move_thumb(root)

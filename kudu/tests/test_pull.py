@@ -25,3 +25,14 @@ def test_pull_project():
         assert exists('index.html')
         assert exists('thumbnail.png')
         assert exists(join('folder', 'foobar.json'))
+
+
+def test_interface():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        write_config({'file_id': 527702})
+        result = runner.invoke(cli, ['pull', '-f', 527702])
+        assert result.exit_code == 0
+        assert exists(join('interface', 'index.html'))
+        assert exists(join('interface_1', 'index.html'))
+        assert exists(join('lang', 'AR.csv'))
