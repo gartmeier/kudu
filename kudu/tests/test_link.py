@@ -9,7 +9,6 @@ from os.path import join, exists
 from click.testing import CliRunner
 
 from kudu.__main__ import cli
-from kudu.config import write_config
 
 
 def terminate_thread(thread_id):

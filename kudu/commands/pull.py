@@ -8,6 +8,7 @@ from shutil import copyfileobj, move, rmtree
 import click
 import requests
 
+from kudu import config
 from kudu.api import request as api_request
 from kudu.types import PitcherFileType
 
@@ -29,7 +30,7 @@ def move_thumb(root):
 
 
 @click.command()
-@click.option('--file', '-f', 'pfile', prompt='File ID', type=PitcherFileType())
+@config.option('--file', '-f', 'pfile', prompt='File ID', type=PitcherFileType())
 @click.pass_context
 def pull(ctx, pfile):
     download_url = api_request('get', '/files/%d/download-url/' % pfile['id'], token=ctx.obj['token']).json()

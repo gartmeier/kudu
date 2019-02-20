@@ -19,8 +19,8 @@ def test_pull_file():
 def test_pull_project():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        write_config({})
-        result = runner.invoke(cli, ['pull', '-f', 519629])
+        write_config({'file_id': 519629})
+        result = runner.invoke(cli, ['pull'])
         assert result.exit_code == 0
         assert exists('index.html')
         assert exists('thumbnail.png')
@@ -31,7 +31,7 @@ def test_interface():
     runner = CliRunner()
     with runner.isolated_filesystem():
         write_config({'file_id': 527702})
-        result = runner.invoke(cli, ['pull', '-f', 527702])
+        result = runner.invoke(cli, ['pull'])
         assert result.exit_code == 0
         assert exists(join('interface', 'index.html'))
         assert exists(join('interface_1', 'index.html'))
