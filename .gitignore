@@ -4,3 +4,4 @@ kudu.egg-info
 kudu.iml
 htmlcov
 .coverage
+.env
