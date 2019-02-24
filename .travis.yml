@@ -1,7 +1,12 @@
 language: python
 python:
-  - "2.7"
+  - 2.7
 install:
   - python setup.py develop
 script:
   - pytest
+deploy:
+  provider: pypi
+  user: torfeld6
+  password:
+    secure: ZvN9GpVl1yvJvLuk96Nc6wWciMlwJE7znaNKzwCNGCSnFUgPafw+vn9A0hO59e6FrgVx/2bGNVs5KCZO8TcKaMUj1pT1tUq2ausYV8mpuMACvLmzY6YAsL+YyXis1MahV7aceEMXRgZJTd885u12GtHKE8OxQu0DAfsJxYfmPsjzsQO1F/W5GZ922RpzRm9v3LnlgUUy8TarXjsvGvjjeFXSuSaotzZlXhPw7iwuDhfTARe21cLhLfRhBtprnzdlwCmviAtvIzyp2MyxxAST/3dCRctCbqMEzcMTL/SIxH1mpetu5+iTfMgak82eBi9QXPkTMzdk5gVw6TYJ2FaDzJhBfXNY2V/n6bVMbN0AXzzOKXm9or688BgbsarjmP7h8OFeAQzdlJlJkh6GavhUH6vdxWdNlQmn/PZHseNaOeEGgcMS+ze+IdOB+m9P/O2hX+Vh4/LTkOqPcOwsLrstLEeab0uGnGK5v2bngFSecoR7QXNeck2SPJddqkT25qAc0HEpcO3rpgrrrhf1v9SQHaNd4tk1V0KT7VB+xNqQlWv4qCrJbnIfzcylyUUS891JO5SX+5E9wR6I2coHBdaI2HE6FRVZwReYKtRcRkrqyu8sXTk1kj94p+ETB5YsU44Wc3jLoB1XZq4a+hVkBiyUF9O6xIiwHVGZB9ayrtxan40=
