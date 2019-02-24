@@ -1,97 +1,71 @@
-import ctypes
 import os
 import shutil
 import tempfile
-import thread
 import time
-from os.path import join, exists
+from os import mkdir, getcwd
 
 from click.testing import CliRunner
+from watchdog import events
 
-from kudu.__main__ import cli
-
-
-def terminate_thread(thread_id):
-    exc = ctypes.py_object(KeyboardInterrupt)
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(thread_id), exc)
+from kudu.commands import link
 
 
-def test_initial_copyfiles():
-    dirpath = os.path.join(tempfile.gettempdir(), str(time.time()))
-    os.mkdir(dirpath)
+def test_interface_path_converter():
+    dst = os.path.join(tempfile.gettempdir(), str(time.time()))
+    mkdir(dst)
 
     runner = CliRunner()
     with runner.isolated_filesystem():
-        open('index.html', 'a').close()
+        src = getcwd()
 
-        thread_id = thread.start_new_thread(runner.invoke, (cli, ['link', '-f', 524689, '-p', dirpath]))
-        time.sleep(2)
+        mkdir('interface')
+        open(os.path.join('interface', 'test.html'), 'wb').close()
 
-        terminate_thread(thread_id)
+        link.copyfiles(src, dst, link.InterfacePathConverter({'filename': 'interface_xy.zip'}))
+        assert os.path.exists(os.path.join(dst, 'interface_xy', 'test.html'))
 
-    assert exists(join(dirpath, 'zip', '524689_1550305880612', 'index.html'))
-    shutil.rmtree(dirpath)
-
-
-def test_subsequent_create_file():
-    dirpath = os.path.join(tempfile.gettempdir(), str(time.time()))
-    os.mkdir(dirpath)
-
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        thread_id = thread.start_new_thread(runner.invoke, (cli, ['link', '-f', 524689, '-p', dirpath]))
-        time.sleep(2)
-
-        open('index.html', 'a').close()
-        time.sleep(1)
-
-        terminate_thread(thread_id)
-
-    assert exists(join(dirpath, 'zip', '524689_1550305880612', 'index.html'))
-    shutil.rmtree(dirpath)
+    shutil.rmtree(dst)
 
 
-def test_subsequent_move_file():
-    dirpath = os.path.join(tempfile.gettempdir(), str(time.time()))
-    os.mkdir(dirpath)
+def test_presentation_path_converter():
+    dst = os.path.join(tempfile.gettempdir(), str(time.time()))
+    mkdir(dst)
 
     runner = CliRunner()
     with runner.isolated_filesystem():
-        open('index.html', 'a').close()
+        src = getcwd()
 
-        thread_id = thread.start_new_thread(runner.invoke, (cli, ['link', '-f', 524689, '-p', dirpath]))
-        time.sleep(2)
+        open('index.html', 'wb').close()
+        open('thumbnail.png', 'wb').close()
+        mkdir('iPadOnly')
+        open(os.path.join('iPadOnly', 'iPad.html'), 'wb').close()
 
-        os.rename('index.html', 'moved.html')
-        time.sleep(1)
+        link.copyfiles(src, dst, link.PresentationPathConverter({'filename': '1234_4321.zip'}))
+        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'index.html'))
+        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', '1234_4321.png'))
+        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'iPad.html'))
 
-        terminate_thread(thread_id)
-
-    assert exists(join(dirpath, 'zip', '524689_1550305880612', 'moved.html'))
-    shutil.rmtree(dirpath)
+    shutil.rmtree(dst)
 
 
-def test_subsequent_modify_file():
-    dirpath = os.path.join(tempfile.gettempdir(), str(time.time()))
-    os.mkdir(dirpath)
+def test_copy_files_event_handler():
+    dst = os.path.join(tempfile.gettempdir(), str(time.time()))
+    mkdir(dst)
 
     runner = CliRunner()
     with runner.isolated_filesystem():
-        open('index.html', 'a').close()
+        src = getcwd()
+        converter = link.PresentationPathConverter({'filename': '1234_4321.zip'})
+        event_handler = link.CopyFilesEventHandler(src, dst, converter)
 
-        thread_id = thread.start_new_thread(runner.invoke, (cli, ['link', '-f', 524689, '-p', dirpath]))
-        time.sleep(2)
+        class TestEvent(object):
+            event_type = events.EVENT_TYPE_MODIFIED
+            src_path = os.path.join(src, 'index.html')
+            is_directory = False
 
-        with open('index.html', 'wb') as stream:
-            stream.write('test')
-        time.sleep(1)
+        open('index.html', 'wb').close()
+        event_handler.on_any_event(TestEvent)
 
-        terminate_thread(thread_id)
+        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'index.html'))
 
-    dst = join(dirpath, 'zip', '524689_1550305880612', 'index.html')
-    assert exists(dst)
-
-    with open(dst, 'rb') as stream:
-        assert stream.read() == 'test'
-
-    shutil.rmtree(dirpath)
+    shutil.rmtree(dst)
