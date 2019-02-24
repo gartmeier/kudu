@@ -5,3 +5,5 @@ kudu.iml
 htmlcov
 .coverage
 .env
+build/
+dist/
