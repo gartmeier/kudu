@@ -1,2 +1,2 @@
 # kudu
-[![Build Status](https://travis-ci.com/torfeld6/kudu.svg?branch=click)](https://travis-ci.com/torfeld6/kudu)
+[![Build Status](https://travis-ci.org/torfeld6/kudu.svg?branch=master)](https://travis-ci.org/torfeld6/kudu)
