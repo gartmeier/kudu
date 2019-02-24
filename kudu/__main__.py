@@ -2,18 +2,18 @@
 
 import click
 
-from kudu import config
 from kudu.api import authenticate
 from kudu.commands.init import init
 from kudu.commands.link import link
 from kudu.commands.pull import pull
 from kudu.commands.push import push
+from kudu.config import ConfigOption
 
 
 @click.group()
-@config.option('--username', prompt=True, envvar='KUDU_USERNAME')
-@config.option('--password', prompt=True, hide_input=True, envvar='KUDU_PASSWORD')
-@config.option('--token', envvar='KUDU_TOKEN')
+@click.option('--username', '-u', cls=ConfigOption, prompt=True, envvar='KUDU_USERNAME')
+@click.option('--password', '-p', cls=ConfigOption, prompt=True, hide_input=True, envvar='KUDU_PASSWORD')
+@click.option('--token', '-t', cls=ConfigOption, envvar='KUDU_TOKEN')
 @click.pass_context
 def cli(ctx, username, password, token):
     if not token:

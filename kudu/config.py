@@ -34,36 +34,15 @@ def load_config():
     return config
 
 
-def get_config_key(param):
-    key = param
+class ConfigOption(click.Option):
+    data = None
 
-    if param[:2] == '--':
-        key = param[2:]
+    def __init__(self, param_decls=None, config_name=None, **attrs):
+        click.Option.__init__(self, param_decls, **attrs)
+        self.config_name = config_name if config_name else self.name
 
-    aliases = {'file': 'file_id'}
-    if key in aliases:
-        key = aliases[key]
-
-    return key
-
-
-def get_config_value(*param_decls):
-    config = load_config()
-    value = None
-
-    for param in param_decls:
-        key = get_config_key(param)
-        value = config.get(key)
-
-        if value:
-            break
-
-    return value
-
-
-def option(*param_decls, **attrs):
-    def decorator(f):
-        attrs['default'] = lambda: get_config_value(*param_decls)
-        return click.option(*param_decls, **attrs)(f)
-
-    return decorator
+    def consume_value(self, ctx, opts):
+        value = super(ConfigOption, self).consume_value(ctx, opts)
+        if value is None:
+            value = load_config().get(self.config_name)
+        return value
