@@ -12,7 +12,7 @@ def write_config(data, path='.kudu.yml'):
 def read_config(path='.kudu.yml'):
     try:
         with open(path, 'r+') as stream:
-            config = yaml.load(stream.read())
+            config = yaml.load(stream.read(), Loader=yaml.CLoader)
     except IOError:
         config = {}
 
