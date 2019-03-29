@@ -10,7 +10,7 @@ setup(
     author_email=__email__,
     version=__version__,
     description='A deployment command line program in Python.',
-    url='https://github.com/torfeld6/kudu-cli',
+    url='https://github.com/torfeld6/kudu',
     license='BSD',
     classifiers=[
         'Intended Audience :: Developers',
