@@ -69,7 +69,10 @@ class CopyFilesEventHandler(FileSystemEventHandler):
                 os.makedirs(dst_dirpath)
 
             click.echo("Copying file: %s" % src_relpath, nl=False)
-            copyfile(src_path, dst_path)
+            try:
+                copyfile(src_path, dst_path)
+            except IOError as e:
+                click.echo(e)
             click.echo("\rCopying file: %s, done." % src_relpath)
 
 
