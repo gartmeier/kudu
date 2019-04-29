@@ -14,7 +14,7 @@ from kudu.types import PitcherFileType
 @click.command()
 @click.option('--file', '-f', 'pfile',
               cls=ConfigOption, config_name='file_id',
-              prompt=True, type=PitcherFileType(category='zip'))
+              prompt=True, type=PitcherFileType(category=('zip', 'presentation')))
 @click.pass_context
 def push(ctx, pfile):
     chroot, ext = os.path.splitext(pfile['filename'])
