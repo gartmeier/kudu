@@ -69,8 +69,13 @@ class CopyFilesEventHandler(FileSystemEventHandler):
                 os.makedirs(dst_dirpath)
 
             click.echo("Copying file: %s" % src_relpath, nl=False)
-            copyfile(src_path, dst_path)
-            click.echo("\rCopying file: %s, done." % src_relpath)
+
+            try:
+                copyfile(src_path, dst_path)
+                click.echo("\rCopying file: %s, done." % src_relpath)
+            except (IOError, OSError):
+                # File most likely does not exist
+                click.echo("\rCopying file: %s, failed." % src_relpath)
 
 
 def countfiles(top):
