@@ -6,6 +6,9 @@
  - [0.4 (2019-04-29)](#04-2019-04-29)
  - [0.2 (2019-04-29)](#02-2019-04-29)
  
+### 0.6 (in development)
+- adds path option to push command
+ 
 ### 0.5 (2019-06-17)
 - requires requests >= 2.20.1
 

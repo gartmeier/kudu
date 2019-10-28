@@ -1,4 +1,5 @@
 import os
+import time
 
 from click.testing import CliRunner
 
@@ -28,5 +29,16 @@ def test_push_zip():
 def test_push_json():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(cli, ['push', '-f', 519631])
-        assert result.exit_code == 2
+        json_txt = '{"time": %d}' % time.time()
+
+        with open('upload.json', 'w+t') as fh:
+            fh.write(json_txt)
+
+        result = runner.invoke(cli, ['push', '-f', 703251, '-p', 'upload.json'])
+        assert result.exit_code == 0
+
+        result = runner.invoke(cli, ['pull', '-f', 703251])
+        assert result.exit_code == 0
+
+        with open('-LsHlYKFuqKEO4VxS2fT.json', 'r+t') as fh:
+            assert json_txt == fh.read()

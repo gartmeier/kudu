@@ -1,9 +1,10 @@
-.idea/
-kudu.egg-info
 *.pyc
-kudu.iml
-htmlcov
 .coverage
 .env
+.idea/
+/venv
 build/
 dist/
+htmlcov
+kudu.egg-info
+kudu.iml
