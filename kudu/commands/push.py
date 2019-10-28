@@ -46,11 +46,11 @@ def make_archive(base_name, root_dir):
 )
 @click.pass_context
 def push(ctx, pf, path):
-    filename, ext = os.path.splitext(pf['filename'])
+    root, ext = os.path.splitext(pf['filename'])
     upload_url = api_request('get', '/files/%d/upload-url/' % pf['id'], token=ctx.obj['token']).json()
 
     if os.path.isdir(path):
-        th, tp = make_archive(filename, path)
+        th, tp = make_archive(root, path)
         requests.put(upload_url, data=os.fdopen(th, 'r+b'))
         os.remove(tp)
     else:
