@@ -40,8 +40,8 @@ def _move(src, dst):
 
 def to_dir(url, root_dir, base_dir, file_category):
     save_cwd = os.getcwd()
-
     os.chdir(root_dir)
+
     unpack_url(url)
 
     if exists(base_dir):
