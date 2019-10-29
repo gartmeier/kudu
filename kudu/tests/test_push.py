@@ -1,5 +1,6 @@
 import os
 import time
+from os.path import exists, join
 
 from click.testing import CliRunner
 
@@ -21,8 +22,8 @@ def test_push_zip():
 
         result = runner.invoke(cli, ['pull', '-f', 519655])
         assert result.exit_code == 0
-        assert os.path.exists(os.path.join('519655_1549795523377', 'index.html'))
-        assert os.path.exists(os.path.join('519655_1549795523377', '519655_1549795523377.png'))
+        assert exists('index.html')
+        assert exists('thumbnail.png')
         assert creation_time != api_request('get', '/files/%d/' % 519655, token=token).json()['creationTime']
 
 

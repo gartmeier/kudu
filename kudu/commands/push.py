@@ -42,6 +42,7 @@ def make_archive(base_name, root_dir):
 )
 @click.option(
     '--path', '-p',
+    type=click.Path(exists=True),
     default=lambda: os.getcwd()
 )
 @click.pass_context
