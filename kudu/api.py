@@ -1,6 +1,6 @@
 import requests
 
-api_url = 'https://api-test.pitcher.com'
+api_url = 'https://api.pitcher.com'
 pitcher_file_categories = ['presentation', 'zip', 'interface']
 
 
