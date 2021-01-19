@@ -26,6 +26,8 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov=kudu
+        coveralls
       env:
         KUDU_USERNAME: ${{ secrets.KUDU_USERNAME }}
         KUDU_PASSWORD: ${{ secrets.KUDU_PASSWORD }}
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
