@@ -37,7 +37,7 @@ def make_archive(base_name, root_dir):
     config_name='file_id',
     prompt=True,
     type=PitcherFileType(
-        category=('zip', 'presentation', 'json')
+        category=('zip', 'presentation', 'json', '')
     )
 )
 @click.option(
