@@ -28,7 +28,7 @@ setup(
     ],
     keywords='cli',
     packages=find_packages(),
-    install_requires=['requests>=2.20.1', 'PyYAML', 'GitPython', 'watchdog', 'click'],
+    install_requires=['requests==2.25.1', 'PyYAML==5.3.1', 'GitPython==2.1.15', 'watchdog==0.10.6', 'click==7.1.2'],
     entry_points={
         'console_scripts': [
             'kudu = kudu.__main__:cli',
