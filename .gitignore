@@ -1,7 +1,10 @@
-*.pyc
 .coverage
 .env
+.env.local
 .idea/
+.venv
+.vscode
+*.pyc
 /venv
 build/
 dist/

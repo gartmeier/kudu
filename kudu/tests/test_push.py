@@ -12,8 +12,12 @@ from kudu.api import request as api_request
 def test_push_zip():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        token = authenticate(os.environ['KUDU_USERNAME'], os.environ['KUDU_PASSWORD'])
-        creation_time = api_request('get', '/files/%d/' % 519655, token=token).json()['creationTime']
+        token = authenticate(
+            os.environ['KUDU_USERNAME'], os.environ['KUDU_PASSWORD']
+        )
+        creation_time = api_request(
+            'get', '/files/%d/' % 519655, token=token
+        ).json()['creationTime']
 
         open('index.html', 'a').close()
         open('thumbnail.png', 'a').close()
@@ -24,7 +28,9 @@ def test_push_zip():
         assert result.exit_code == 0
         assert exists('index.html')
         assert exists('thumbnail.png')
-        assert creation_time != api_request('get', '/files/%d/' % 519655, token=token).json()['creationTime']
+        assert creation_time != api_request(
+            'get', '/files/%d/' % 519655, token=token
+        ).json()['creationTime']
 
 
 def test_push_json():

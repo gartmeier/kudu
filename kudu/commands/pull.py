@@ -62,20 +62,20 @@ def to_file(download_url, path):
 
 @click.command()
 @click.option(
-    '--file', '-f', 'pf',
+    '--file',
+    '-f',
+    'pf',
     cls=ConfigOption,
     config_name='file_id',
     prompt='File ID',
     type=PitcherFileType()
 )
-@click.option(
-    '--path', '-p',
-    type=click.Path(),
-    default=lambda: os.getcwd()
-)
+@click.option('--path', '-p', type=click.Path(), default=lambda: os.getcwd())
 @click.pass_context
 def pull(ctx, pf, path):
-    download_url = api_request('get', '/files/%d/download-url/' % pf['id'], token=ctx.obj['token']).json()
+    download_url = api_request(
+        'get', '/files/%d/download-url/' % pf['id'], token=ctx.obj['token']
+    ).json()
 
     if isdir(path):
         filename_root, filename_ext = os.path.splitext(pf['filename'])

@@ -1,8 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-from kudu import __author__
-from kudu import __email__
-from kudu import __version__
+from kudu import __author__, __email__, __version__
 
 setup(
     name='kudu',
@@ -18,20 +16,22 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     keywords='cli',
     packages=find_packages(),
-    install_requires=['requests==2.25.1', 'PyYAML==5.3.1', 'GitPython==2.1.15', 'watchdog==0.10.6', 'click==7.1.2'],
+    install_requires=[
+        'requests>=2.25.1', 'PyYAML>=5.4.1', 'watchdog>=2.0.2', 'click>=7.1.2'
+    ],
     entry_points={
-        'console_scripts': [
-            'kudu = kudu.__main__:cli',
-        ],
+        'console_scripts': ['kudu = kudu.__main__:cli',],
     },
 )

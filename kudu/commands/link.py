@@ -2,11 +2,14 @@ import os
 import time
 from fnmatch import fnmatch
 from os import getcwd
-from os.path import join, splitext, split
+from os.path import join, split, splitext
 from shutil import copyfile
 
 import click
-from watchdog.events import FileSystemEventHandler, EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, EVENT_TYPE_CREATED
+from watchdog.events import (
+    EVENT_TYPE_CREATED, EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED,
+    FileSystemEventHandler
+)
 from watchdog.observers import Observer
 
 from kudu.config import ConfigOption
@@ -15,6 +18,7 @@ from kudu.types import PitcherFileType
 
 
 class PitcherFilePathConverter(object):
+
     def __init__(self, pfile):
         self.pfile = pfile
 
@@ -42,6 +46,7 @@ class PresentationPathConverter(InteractivePathConverter):
 
 
 class InterfacePathConverter(PitcherFilePathConverter):
+
     def convert(self, relpath):
         if fnmatch(relpath, join('interface', '*')):
             dirname = splitext(self.pfile['filename'])[0]
@@ -57,7 +62,8 @@ class CopyFilesEventHandler(FileSystemEventHandler):
         self.converter = converter
 
     def on_any_event(self, event):
-        if event.event_type in [EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, EVENT_TYPE_CREATED] and not event.is_directory:
+        if event.event_type in [EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED,
+                                EVENT_TYPE_CREATED] and not event.is_directory:
             src_path = event.src_path if event.event_type != EVENT_TYPE_MOVED else event.dest_path
             src_relpath = os.path.relpath(src_path)
 
@@ -97,7 +103,7 @@ def copyfiles(src, dst, converter):
     curr = 0
 
     if not os.path.exists(dst):
-        os.makedirs(dst, 0755)
+        os.makedirs(dst, 0o755)
 
     click.echo('Copying files', nl=False)
 
@@ -136,13 +142,24 @@ def watchfiles(src, dst, converter):
 
 
 @click.command()
-@click.option('--file', '-f', 'pfile',
-              cls=ConfigOption, config_name='file_id',
-              prompt=True, type=PitcherFileType(category=['zip', 'presentation', '']))
-@click.option('--pitcher-folders', '-pf',
-              cls=ConfigOption, config_name='pitcher_folders',
-              prompt=True, default=lambda: default_pitcher_folders(),
-              type=click.Path(exists=True, file_okay=False, writable=True))
+@click.option(
+    '--file',
+    '-f',
+    'pfile',
+    cls=ConfigOption,
+    config_name='file_id',
+    prompt=True,
+    type=PitcherFileType(category=['zip', 'presentation', ''])
+)
+@click.option(
+    '--pitcher-folders',
+    '-pf',
+    cls=ConfigOption,
+    config_name='pitcher_folders',
+    prompt=True,
+    default=lambda: default_pitcher_folders(),
+    type=click.Path(exists=True, file_okay=False, writable=True)
+)
 def link(pfile, pitcher_folders):
     cwd = getcwd()
 

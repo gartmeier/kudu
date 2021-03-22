@@ -21,7 +21,10 @@ def test_interface_path_converter():
         mkdir('interface')
         open(os.path.join('interface', 'test.html'), 'wb').close()
 
-        link.copyfiles(src, dst, link.InterfacePathConverter({'filename': 'interface_xy.zip'}))
+        link.copyfiles(
+            src, dst,
+            link.InterfacePathConverter({'filename': 'interface_xy.zip'})
+        )
         assert os.path.exists(os.path.join(dst, 'interface_xy', 'test.html'))
 
     shutil.rmtree(dst)
@@ -40,10 +43,19 @@ def test_presentation_path_converter():
         mkdir('iPadOnly')
         open(os.path.join('iPadOnly', 'iPad.html'), 'wb').close()
 
-        link.copyfiles(src, dst, link.PresentationPathConverter({'filename': '1234_4321.zip'}))
-        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'index.html'))
-        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', '1234_4321.png'))
-        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'iPad.html'))
+        link.copyfiles(
+            src, dst,
+            link.PresentationPathConverter({'filename': '1234_4321.zip'})
+        )
+        assert os.path.exists(
+            os.path.join(dst, 'slides', '1234_4321', 'index.html')
+        )
+        assert os.path.exists(
+            os.path.join(dst, 'slides', '1234_4321', '1234_4321.png')
+        )
+        assert os.path.exists(
+            os.path.join(dst, 'slides', '1234_4321', 'iPad.html')
+        )
 
     shutil.rmtree(dst)
 
@@ -55,7 +67,9 @@ def test_copy_files_event_handler():
     runner = CliRunner()
     with runner.isolated_filesystem():
         src = getcwd()
-        converter = link.PresentationPathConverter({'filename': '1234_4321.zip'})
+        converter = link.PresentationPathConverter({
+            'filename': '1234_4321.zip'
+        })
         event_handler = link.CopyFilesEventHandler(src, dst, converter)
 
         class TestEvent(object):
@@ -66,6 +80,8 @@ def test_copy_files_event_handler():
         open('index.html', 'wb').close()
         event_handler.on_any_event(TestEvent)
 
-        assert os.path.exists(os.path.join(dst, 'slides', '1234_4321', 'index.html'))
+        assert os.path.exists(
+            os.path.join(dst, 'slides', '1234_4321', 'index.html')
+        )
 
     shutil.rmtree(dst)

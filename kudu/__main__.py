@@ -11,8 +11,17 @@ from kudu.config import ConfigOption
 
 
 @click.group()
-@click.option('--username', '-u', cls=ConfigOption, prompt=True, envvar='KUDU_USERNAME')
-@click.option('--password', '-p', cls=ConfigOption, prompt=True, hide_input=True, envvar='KUDU_PASSWORD')
+@click.option(
+    '--username', '-u', cls=ConfigOption, prompt=True, envvar='KUDU_USERNAME'
+)
+@click.option(
+    '--password',
+    '-p',
+    cls=ConfigOption,
+    prompt=True,
+    hide_input=True,
+    envvar='KUDU_PASSWORD'
+)
 @click.option('--token', '-t', cls=ConfigOption, envvar='KUDU_TOKEN')
 @click.pass_context
 def cli(ctx, username, password, token):
@@ -23,11 +32,7 @@ def cli(ctx, username, password, token):
             click.echo('Invalid username or password', err=True)
             exit(1)
 
-    ctx.obj = {
-        'username': username,
-        'password': password,
-        'token': token
-    }
+    ctx.obj = {'username': username, 'password': password, 'token': token}
 
 
 cli.add_command(init)

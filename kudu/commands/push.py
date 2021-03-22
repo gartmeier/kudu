@@ -21,8 +21,13 @@ def make_archive(base_name, root_dir):
     for root, dirs, files in os.walk(os.getcwd()):
         arcroot = os.path.relpath(root)
         for name in files:
-            arcname = name if not (arcroot == os.curdir and name == 'thumbnail.png') else base_name + '.png'
-            zf.write(os.path.join(root, name), os.path.join(base_name, arcroot, arcname))
+            arcname = name if not (
+                arcroot == os.curdir and name == 'thumbnail.png'
+            ) else base_name + '.png'
+            zf.write(
+                os.path.join(root, name),
+                os.path.join(base_name, arcroot, arcname)
+            )
 
     zf.close()
     os.chdir(save_cwd)
@@ -32,23 +37,23 @@ def make_archive(base_name, root_dir):
 
 @click.command()
 @click.option(
-    '--file', '-f', 'pf',
+    '--file',
+    '-f',
+    'pf',
     cls=ConfigOption,
     config_name='file_id',
     prompt=True,
-    type=PitcherFileType(
-        category=('zip', 'presentation', 'json', '')
-    )
+    type=PitcherFileType(category=('zip', 'presentation', 'json', ''))
 )
 @click.option(
-    '--path', '-p',
-    type=click.Path(exists=True),
-    default=lambda: os.getcwd()
+    '--path', '-p', type=click.Path(exists=True), default=lambda: os.getcwd()
 )
 @click.pass_context
 def push(ctx, pf, path):
     root, ext = os.path.splitext(pf['filename'])
-    upload_url = api_request('get', '/files/%d/upload-url/' % pf['id'], token=ctx.obj['token']).json()
+    upload_url = api_request(
+        'get', '/files/%d/upload-url/' % pf['id'], token=ctx.obj['token']
+    ).json()
 
     if os.path.isdir(path):
         th, tp = make_archive(root, path)

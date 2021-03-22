@@ -6,7 +6,9 @@ import yaml
 
 def write_config(data, path='.kudu.yml'):
     with open(path, 'w+') as stream:
-        yaml.safe_dump(data, stream, default_flow_style=False, allow_unicode=True)
+        yaml.safe_dump(
+            data, stream, default_flow_style=False, allow_unicode=True
+        )
 
 
 def read_config(path='.kudu.yml'):
