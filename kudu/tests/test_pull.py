@@ -1,31 +1,10 @@
-from os.path import join, exists
+from os.path import exists, join
 from zipfile import ZipFile
 
 from click.testing import CliRunner
 
 from kudu.__main__ import cli
 from kudu.config import write_config
-
-
-def test_pull_file():
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        result = runner.invoke(cli, ['pull', '-f', 519629])
-        assert result.exit_code == 0
-        assert exists('index.html')
-        assert exists('thumbnail.png')
-        assert exists(join('folder', 'foobar.json'))
-
-
-def test_pull_project():
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        write_config({'file_id': 519629})
-        result = runner.invoke(cli, ['pull'])
-        assert result.exit_code == 0
-        assert exists('index.html')
-        assert exists('thumbnail.png')
-        assert exists(join('folder', 'foobar.json'))
 
 
 def test_interface():
@@ -39,18 +18,29 @@ def test_interface():
         assert exists(join('lang', 'AR.csv'))
 
 
-def test_json_with_path():
+def test_json_path():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(cli, ['pull', '-f', 703251, '-p', 'test.json'])
+        result = runner.invoke(cli, ['pull', '-f', 519631, '-p', 'test.json'])
         assert result.exit_code == 0
         assert exists('test.json')
 
 
-def test_zip_with_path():
+def test_zip():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(cli, ['pull', '-f', 527702, '-p', 'test.zip'])
+        write_config({'file_id': 519629})
+        result = runner.invoke(cli, ['pull'])
+        assert result.exit_code == 0
+        assert exists('index.html')
+        assert exists('thumbnail.png')
+        assert exists(join('folder', 'foobar.json'))
+
+
+def test_zip_path():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli, ['pull', '-f', 519629, '-p', 'test.zip'])
         assert result.exit_code == 0
         assert exists('test.zip')
 
