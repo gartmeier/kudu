@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/torfeld6/kudu.svg?branch=master)](https://travis-ci.org/torfeld6/kudu) [![codebeat badge](https://codebeat.co/badges/be7de81c-c082-41ad-ba1d-ca5ee2d0b07a)](https://codebeat.co/projects/github-com-torfeld6-kudu-master) [![Coverage Status](https://coveralls.io/repos/github/torfeld6/kudu/badge.svg?branch=master)](https://coveralls.io/github/torfeld6/kudu?branch=master)
 
 ## Release History
+ - [0.9 (2019-10-29)](#09-2021-03-23)
  - [0.8 (2019-10-29)](#08-2021-01-19)
  - [0.7 (2019-10-29)](#07-2019-10-29)
  - [0.6 (2019-10-28)](#06-2019-10-28)
