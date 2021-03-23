@@ -8,6 +8,12 @@
  - [0.5 (2019-06-17)](#05-2019-06-17)
  - [0.4 (2019-04-29)](#04-2019-04-29)
  - [0.2 (2019-04-29)](#02-2019-04-29)
+
+### 0.9 (2021-03-23)
+- adds push command category rules
+- loosens up install requirements
+- adds OS Independent test matrix
+- moves interface folder based on filename
  
 ### 0.8 (2021-01-19)
 - adds support for iOS UIs
