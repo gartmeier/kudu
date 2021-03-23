@@ -29,7 +29,7 @@ setup(
     install_requires=[
         'requests>=2.25.1',
         'PyYAML>=5.4.1',
-        'watchdog>=0.10.6,<2.0.0',
+        'watchdog>=0.10.6,<1.0.0',
         'click>=7.1.2,<8.0.0',
     ],
     entry_points={
