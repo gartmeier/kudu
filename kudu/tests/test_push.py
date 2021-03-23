@@ -49,7 +49,10 @@ def test_rules():
         _, name = mkztemp('test', name_rules=rules)
 
         zf = zipfile.ZipFile(name)
-        assert zf.namelist() == ['test/test.png', 'test/index.html']
+        zf_namelist = zf.namelist()
+        assert len(zf_namelist) == 2
+        assert 'test/test.png' in zf_namelist
+        assert 'test/index.html' in zf_namelist
 
 
 def test_zip():
