@@ -55,40 +55,15 @@ def test_rules():
 def test_zip():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        token = authenticate(
-            os.environ['KUDU_USERNAME'], os.environ['KUDU_PASSWORD']
-        )
-        creation_time = api_request(
-            'get', '/files/%d/' % 519655, token=token
-        ).json()['creationTime']
-
         open('index.html', 'a').close()
         open('thumbnail.png', 'a').close()
         result = runner.invoke(cli, ['push', '-f', 519655])
         assert result.exit_code == 0
 
-        result = runner.invoke(cli, ['pull', '-f', 519655])
-        assert result.exit_code == 0
-        assert exists('index.html')
-        assert exists('thumbnail.png')
-        assert creation_time != api_request(
-            'get', '/files/%d/' % 519655, token=token
-        ).json()['creationTime']
-
 
 def test_json():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        json_txt = '{"time": %d}' % time.time()
-
-        with open('upload.json', 'w+t') as fh:
-            fh.write(json_txt)
-
+        open('upload.json', 'a').close()
         result = runner.invoke(cli, ['push', '-f', 703251, '-p', 'upload.json'])
         assert result.exit_code == 0
-
-        result = runner.invoke(cli, ['pull', '-f', 703251])
-        assert result.exit_code == 0
-
-        with open('-LsHlYKFuqKEO4VxS2fT.json', 'r+t') as fh:
-            assert json_txt == fh.read()
