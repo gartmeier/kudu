@@ -12,13 +12,15 @@ from kudu.types import PitcherFileType
 
 CategoryRule = namedtuple('crule', ('category', 'rule'))
 
-CATEGORY_RULES = (
-    CategoryRule(
-        '', NameRule((r'^interface', r'(.+)'), ('{base_name}', '{0}'))
-    ),
-    CategoryRule('zip', NameRule(r'^thumbnail.png', '{base_name}.png')),
-    CategoryRule('zip', NameRule(r'(.+)', ('{base_name}', '{0}'))),
-)
+
+CATEGORY_CRULES = (
+    CategoryRule('',
+                 NameRule((r'^interface', r'(.+)'), ('{base_name}', '{0}'))),
+    CategoryRule(('presentation', 'zip'),
+                 NameRule(r'^thumbnail.png', '{base_name}.png')),
+    CategoryRule(('presentation', 'zip'),
+                 NameRule(r'(.+)', ('{base_name}', '{0}'))),
+) # yapf: disable
 
 
 @click.command()
@@ -41,7 +43,9 @@ def push(ctx, pf, path):
     response = api_request('get', url, token=ctx.obj['token'])
 
     if path is None or os.path.isdir(path):
-        rules = [c.rule for c in CATEGORY_RULES if c.category == pf['category']]
+        rules = [
+            c.rule for c in CATEGORY_CRULES if pf['category'] in c.category
+        ]
         fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
         data = os.fdopen(fp, 'r+b')
     else:
