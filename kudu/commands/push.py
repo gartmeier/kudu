@@ -13,7 +13,7 @@ from kudu.types import PitcherFileType
 CategoryRule = namedtuple('crule', ('category', 'rule'))
 
 
-CATEGORY_CRULES = (
+CATEGORY_RULES = (
     CategoryRule('',
                  NameRule((r'^interface', r'(.+)'), ('{base_name}', '{0}'))),
     CategoryRule(('presentation', 'zip'),
@@ -43,9 +43,7 @@ def push(ctx, pf, path):
     response = api_request('get', url, token=ctx.obj['token'])
 
     if path is None or os.path.isdir(path):
-        rules = [
-            c.rule for c in CATEGORY_CRULES if pf['category'] in c.category
-        ]
+        rules = [c.rule for c in CATEGORY_RULES if pf['category'] in c.category]
         fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
         data = os.fdopen(fp, 'r+b')
     else:
