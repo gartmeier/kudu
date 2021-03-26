@@ -35,24 +35,25 @@ def test_rules():
         mkdir('interface')
         open('interface/index.html', 'a').close()
 
-        rules = (r.rule for r in CATEGORY_RULES if r.category == '')
+        rules = [r.rule for r in CATEGORY_RULES if '' in r.category]
         _, name = mkztemp('interface_test', name_rules=rules)
 
         zf = zipfile.ZipFile(name)
-        assert zf.namelist() == ['interface_test/index.html']
+        namelist = zf.namelist()
+        assert namelist == ['interface_test/index.html']
 
     with runner.isolated_filesystem():
         open('index.html', 'a').close()
         open('thumbnail.png', 'a').close()
 
-        rules = [r.rule for r in CATEGORY_RULES if r.category == 'zip']
+        rules = [r.rule for r in CATEGORY_RULES if 'zip' in r.category]
         _, name = mkztemp('test', name_rules=rules)
 
         zf = zipfile.ZipFile(name)
-        zf_namelist = zf.namelist()
-        assert len(zf_namelist) == 2
-        assert 'test/test.png' in zf_namelist
-        assert 'test/index.html' in zf_namelist
+        namelist = zf.namelist()
+        assert len(namelist) == 2
+        assert 'test/test.png' in namelist
+        assert 'test/index.html' in namelist
 
 
 def test_zip():
