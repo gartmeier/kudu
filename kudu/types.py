@@ -1,6 +1,7 @@
 from click.types import IntParamType
+from requests import HTTPError
 
-from kudu.api import request as api_request
+from kudu.api import api
 
 
 class PitcherFileType(IntParamType):
@@ -12,12 +13,8 @@ class PitcherFileType(IntParamType):
     def convert(self, value, param, ctx):
         value = super(PitcherFileType, self).convert(value, param, ctx)
 
-        res = api_request('get', '/files/%d/' % value, token=ctx.obj['token'])
-        if res.status_code != 200:
+        try:
+            return api.get_file(value)
+        except HTTPError as e:
+            print(e)
             self.fail('%d is not a valid file' % value)
-
-        data = res.json()
-        if self.category and data.get('category') not in self.category:
-            self.fail('%d is not of a valid file category' % value)
-
-        return data
