@@ -28,7 +28,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
-        'PyYAML>=5.4.1',
+        'PyYAML>=5.4.1,<6.0.0',
         'watchdog>=0.10.4,<1.0.0',
         'click>=7.1.2,<8.0.0',
     ],
