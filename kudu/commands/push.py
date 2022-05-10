@@ -56,12 +56,13 @@ def push(ctx, pf, path):
     url = '/files/%d/' % pf['id']
     json = {
         'creationTime': datetime.utcnow().isoformat(),
-        'metadata': get_metadata_with_commit_info(ctx, pf)
+        'metadata': get_metadata_with_github_info(ctx, pf)
     }
     api_request('patch', url, json=json, token=ctx.obj['token'])
 
 
-def get_metadata_with_commit_info(ctx, pf):
+def get_metadata_with_github_info(ctx, pf):
+    # first get existing metadata then modify it
     url = '/files/%d/' % pf['id']
     response = api_request('get', url, token=ctx.obj['token']).json()
     metadata = response.get('metadata', {})
