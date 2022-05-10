@@ -54,5 +54,23 @@ def push(ctx, pf, path):
 
     # touch file
     url = '/files/%d/' % pf['id']
-    json = {'creationTime': datetime.utcnow().isoformat()}
+    json = {
+        'creationTime': datetime.utcnow().isoformat(),
+        'metadata': get_metadata_with_commit_info(ctx, pf)
+    }
     api_request('patch', url, json=json, token=ctx.obj['token'])
+
+
+def get_metadata_with_commit_info(ctx, pf):
+    url = '/files/%d/' % pf['id']
+    response = api_request('get', url, token=ctx.obj['token']).json()
+    metadata = response.get('metadata', {})
+
+    # NOT losing repo info for non-github deployments
+    current_repo_info = metadata.get('githubRepository', 'not_available') 
+    metadata['githubRepository'] = os.environ.get('GITHUB_REPOSITORY', current_repo_info)
+
+    # losing last commit SHA info for non-github deployments
+    metadata['lastCommitSHA'] = os.environ.get('GITHUB_SHA', 'not_available')
+
+    return metadata
