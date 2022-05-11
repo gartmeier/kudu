@@ -54,5 +54,25 @@ def push(ctx, pf, path):
 
     # touch file
     url = '/files/%d/' % pf['id']
-    json = {'creationTime': datetime.utcnow().isoformat()}
+    json = {
+        'creationTime': datetime.utcnow().isoformat(),
+        'metadata': get_metadata_with_github_info(ctx, pf)
+    }
     api_request('patch', url, json=json, token=ctx.obj['token'])
+
+
+def get_metadata_with_github_info(ctx, pf):
+    # first get existing metadata then modify it
+    url = '/files/%d/' % pf['id']
+    response = api_request('get', url, token=ctx.obj['token']).json()
+    metadata = response.get('metadata', {})
+
+    # NOT losing repo info for non-github deployments
+    current_repo_info = metadata.get('GITHUB_REPOSITORY', 'not_available') 
+    metadata['GITHUB_REPOSITORY'] = os.environ.get('GITHUB_REPOSITORY', current_repo_info)
+
+    # losing commit SHA and run id info for non-github deployments
+    metadata['GITHUB_SHA'] = os.environ.get('GITHUB_SHA', 'not_available')
+    metadata['GITHUB_RUN_ID'] = os.environ.get('GITHUB_RUN_ID', 'not_available')
+
+    return metadata
