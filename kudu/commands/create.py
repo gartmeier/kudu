@@ -13,7 +13,6 @@ from kudu.api import request as api_request
 def create(ctx, appid, body):
     token = ctx.obj['token']
     file_id = create_file(token, appid, body)
-    print('file_id', file_id)
     write_config({'file_id': file_id})
     pitcher_file = get_pitcher_file(file_id, token)
     upload_file(token, pitcher_file)
