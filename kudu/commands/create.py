@@ -9,17 +9,17 @@ from kudu.commands.push import get_file_data
 from kudu.api import request as api_request
 
 @click.command()
-@click.option('--appid', '-a', type=int, required=True, help="appId")
+@click.option('--instance', '-i', type=int, required=True, help="instance id to upload file")
 @click.option('--body', '-b', type=str, required=True, help="Body of the file")
 @click.option('--filename', '-f', type=str, required=False, help="Name of the file in bucket")
 @click.pass_context
-def create(ctx, appid, body, filename = None):
+def create(ctx, instance, body, filename = None):
     if not filename:
         filename = str(time.time() * 1000)
 
     token = ctx.obj['token']
     file_data = get_file_data(filename=filename, category='zip')
-    file_id = create_file(token, appid, body, file_data=file_data)
+    file_id = create_file(token, instance, body, file_data=file_data)
     update_file_metadata(token, file_id)
 
 
