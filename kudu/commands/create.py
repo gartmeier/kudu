@@ -13,10 +13,9 @@ def create(ctx, instance, body, filename = None):
     if not filename:
         filename = str(time.time() * 1000)
 
-    token = ctx.obj['token']
     file_data = get_file_data(filename=filename, category='zip')
-    file_id = create_file(token, instance, body, file_data=file_data)
-    update_file_metadata(token, file_id)
+    file_id = create_file(ctx.obj['token'], instance, body, file_data=file_data)
+    update_file_metadata(ctx.obj['token'], file_id)
 
 
 def get_pitcher_file(file_id, token):
