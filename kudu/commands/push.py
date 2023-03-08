@@ -36,36 +36,48 @@ CATEGORY_RULES = (
 @click.option('--path', '-p', type=click.Path(exists=True), default=None)
 @click.pass_context
 def push(ctx, pf, path):
-    upload_file(pf=pf, path=path, token=ctx.obj['token'])
+    token=ctx.obj['token']
+    upload_file(token, pf, path)
 
 def upload_file(token, pf, path = None):
-    name = pf['filename']
-    base_name, _ = os.path.splitext(name)
-
-    url = '/files/%d/upload-url/' % pf['id']
+    file_id = pf['id']
+    category = pf['category']
+    filename = pf['filename']
+    url = '/files/%d/upload-url/' % file_id
     response = api_request('get', url, token=token)
 
-    if path is None or os.path.isdir(path):
-        rules = [c.rule for c in CATEGORY_RULES if pf['category'] in c.category]
-        fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
-        data = os.fdopen(fp, 'r+b')
-    else:
-        data = open(path, 'r+b')
+    data = get_file_data(filename, category, path)
 
     # upload data
     requests.put(response.json(), data=data)
 
     # touch file
-    url = '/files/%d/' % pf['id']
+    update_file_metadata(token, file_id)
+
+def update_file_metadata(token, file_id):
+    url = '/files/%d/' % file_id
     json = {
         'creationTime': datetime.utcnow().isoformat(),
-        'metadata': get_metadata_with_github_info(token, pf)
+        'metadata': get_metadata_with_github_info(token, file_id)
     }
     api_request('patch', url, json=json, token=token)
 
-def get_metadata_with_github_info(token, pf):
+
+def get_file_data(filename, category, path = None):
+    base_name, _ = os.path.splitext(filename)
+
+    if path is None or os.path.isdir(path):
+        rules = [c.rule for c in CATEGORY_RULES if category in c.category]
+        fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
+        data = os.fdopen(fp, 'r+b')
+    else:
+        data = open(path, 'r+b')
+
+    return data
+
+def get_metadata_with_github_info(token, file_id):
     # first get existing metadata then modify it
-    url = '/files/%d/' % pf['id']
+    url = '/files/%d/' % file_id
     response = api_request('get', url, token).json()
     metadata = response.get('metadata', {})
 
