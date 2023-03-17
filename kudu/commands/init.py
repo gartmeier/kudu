@@ -3,7 +3,7 @@ import os
 import json
 from kudu.api import request
 from kudu.config import write_config
-from kudu.file import create_file
+from kudu.file import upload_file_from_url
 
 @click.command()
 @click.pass_context
@@ -11,7 +11,7 @@ def init(ctx):
     if click.confirm('Would you like to create a new file?'):
         app_id = click.prompt('Instance ID', type=int)
         file_body = click.prompt('File Body')
-        file_id = create_file(ctx.obj['token'], app_id, file_body, download_url='https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip')
+        file_id = upload_file_from_url(ctx.obj['token'], app_id, file_body, download_url='https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip')
     else:
         file_id = validate_file(
             click.prompt('File ID', type=int), ctx.obj['token']

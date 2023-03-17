@@ -1,10 +1,10 @@
 import os
-import json
 import click
 import os
 
 from collections import namedtuple
 from datetime import datetime
+import time
 
 from kudu.api import request as api_request
 from kudu.mkztemp import NameRule, mkztemp
@@ -21,30 +21,45 @@ CATEGORY_RULES = (
                  NameRule(r'(.+)', ('{base_name}', '{0}'))),
 ) # yapf: disable
 
-def create_file(token, app_id, file_body, download_url = None, file_data= None):
-    requestJSON = {
+def upload_file(token, app_id, file_body, file_data, file_name, extension = 'zip'):
+    multipart_form_data = {
         'app':
-            app_id,
+            (None, app_id),
         'body':
-            file_body
+            (None, file_body),
+        'file': (
+            '%s.%s' % (file_name, extension), 
+            file_data, 
+            'application/octet-stream'
+        )
     }
 
-    if download_url:
-        requestJSON['downloadUrl'] = download_url
+    if file_name:
+        multipart_form_data['filename'] = (None, file_name)
 
-    if file_data:
-        files = {
-            'json': (None, json.dumps(requestJSON), 'application/json'),
-            'file': (os.path.basename(file_body), file_data, 'application/octet-stream')
-        }
-
-    res = api_request(
+    return handle_file_create_response(api_request(
         'post',
         '/files/',
-        files=files,
+        files=multipart_form_data,
         token=token
-    )
+    ))
 
+def upload_file_from_url(token, app_id, file_body, download_url):
+    return handle_file_create_response(api_request(
+        'post',
+        '/files/',
+        json={
+            'app':
+                app_id,
+            'body':
+                file_body,
+            'downloadUrl': 
+                download_url
+        },
+        token=token
+    ))
+
+def handle_file_create_response(res):
     resJson = res.json()
 
     if res.status_code != 201:
