@@ -68,6 +68,8 @@ def test_zip():
 def test_json():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        open('upload.json', 'a').close()
+        with open('upload.json', 'a') as f:
+            f.write('{ "test": "test" }')
+
         result = runner.invoke(cli, ['push', '-f', 703251, '-p', 'upload.json'])
         assert result.exit_code == 0
