@@ -32,7 +32,7 @@ def push(ctx, pf, path, instance, body, filename, extension):
         if not instance or not body:
             click.echo('instance and body should be provided when creating a new file', err=True)
             exit(1)
-        create_or_update_file(ctx.obj['token'], filename=filename, path=path, body=body, instance=instance, category=extension)
+        create_or_update_file(ctx.obj['token'], filename=filename or '%s.%s' % (str(round(time.time() * 1000)), extension), path=path, body=body, instance=instance, category=extension)
 
 def create_or_update_file(token, filename, path = None, file_id=None, body=None, instance=None, category = None):
     file_data = get_file_data(filename=filename, category=category, path=path)
