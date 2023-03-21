@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from kudu.__main__ import cli
 from kudu.api import authenticate
 from kudu.api import request as api_request
-from kudu.commands.push import CATEGORY_RULES
+from kudu.file import CATEGORY_RULES
 from kudu.config import write_config
 from kudu.mkztemp import NameRule, mkztemp
 
@@ -68,6 +68,8 @@ def test_zip():
 def test_json():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        open('upload.json', 'a').close()
+        with open('upload.json', 'a') as f:
+            f.write('{ "test": "test" }')
+
         result = runner.invoke(cli, ['push', '-f', 703251, '-p', 'upload.json'])
         assert result.exit_code == 0
