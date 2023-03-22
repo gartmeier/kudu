@@ -1,8 +1,12 @@
 import click
+import os
 import time
 
+from kudu.config import write_config
+from kudu.commands.init import create_file
+from kudu.commands.push import update_file_metadata
+from kudu.commands.push import get_file_data
 from kudu.api import request as api_request
-from kudu.file import create_file, update_file_metadata, get_file_data
 
 @click.command()
 @click.option('--instance', '-i', type=int, required=True, help="instance id to upload file")
