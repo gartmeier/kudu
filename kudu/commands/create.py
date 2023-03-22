@@ -1,17 +1,14 @@
 import click
 import os
-import time
 
 from kudu.config import write_config
 from kudu.commands.init import create_file
-from kudu.commands.push import update_file_metadata
-from kudu.commands.push import get_file_data
+from kudu.commands.push import upload_file
 from kudu.api import request as api_request
 
 @click.command()
 @click.option('--instance', '-i', type=int, required=True, help="instance id to upload file")
 @click.option('--body', '-b', type=str, required=True, help="Body of the file")
-@click.option('--filename', '-f', type=str, required=False, help="Name of the file in bucket")
 @click.pass_context
 def create(ctx, instance, body, filename = None):
     if not filename:

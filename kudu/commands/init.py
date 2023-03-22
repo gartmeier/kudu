@@ -1,6 +1,5 @@
 import click
-import os
-import json
+
 from kudu.api import request
 from kudu.config import write_config
 
@@ -20,7 +19,7 @@ def init(ctx):
     write_config({'file_id': file_id})
 
 
-def create_file(token, app_id, file_body, download_url = None, file_data= None):
+def create_file(token, app_id, file_body, download_url = None):
     requestJSON = {
         'app':
             app_id,
@@ -31,29 +30,22 @@ def create_file(token, app_id, file_body, download_url = None, file_data= None):
     if download_url:
         requestJSON['downloadUrl'] = download_url
 
-    if file_data:
-        files = {
-            'json': (None, json.dumps(requestJSON), 'application/json'),
-            'file': (os.path.basename(file_body), file_data, 'application/octet-stream')
-        }
-
     res = request(
         'post',
         '/files/',
-        files=files,
+        json=requestJSON,
         token=token
     )
-
-    resJson = res.json()
+    json = res.json()
 
     if res.status_code != 201:
-        if resJson.get('app'):
+        if json.get('app'):
             click.echo('Invalid instance', err=True)
         else:
             click.echo('Unknown error', err=True)
         exit(1)
 
-    return resJson.get('id')
+    return json.get('id')
 
 
 def validate_file(file_id, token):
