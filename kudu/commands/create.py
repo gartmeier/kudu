@@ -1,17 +1,20 @@
 import click
+import time
 
 from kudu.api import request as api_request
-from kudu.file import upload_file, update_file_metadata, get_file_data
+from kudu.file import create_file, update_file_metadata, get_file_data
 
 @click.command()
 @click.option('--instance', '-i', type=int, required=True, help="instance id to upload file")
 @click.option('--body', '-b', type=str, required=True, help="Body of the file")
 @click.option('--filename', '-f', type=str, required=False, help="Name of the file in bucket")
-@click.option('--extension', '-e', type=str, required=False, default="zip", help="Extension of the file that's going to be uploaded, default 'zip'")
 @click.pass_context
-def create(ctx, instance, body, filename = None, extension = None):
-    file_data = get_file_data(filename=filename or '', category=extension)
-    file_id = upload_file(ctx.obj['token'], instance, body, file_data=file_data, file_name=filename, extension=extension)
+def create(ctx, instance, body, filename = None):
+    if not filename:
+        filename = str(time.time() * 1000)
+
+    file_data = get_file_data(filename=filename, category='zip')
+    file_id = create_file(ctx.obj['token'], instance, body, file_data=file_data)
     update_file_metadata(ctx.obj['token'], file_id)
 
 
