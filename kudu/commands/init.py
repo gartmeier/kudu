@@ -8,9 +8,7 @@ from kudu.config import write_config
 @click.pass_context
 def init(ctx):
     if click.confirm('Would you like to create a new file?'):
-        app_id = click.prompt('Instance ID', type=int)
-        file_body = click.prompt('File Body')
-        file_id = create_file(ctx.obj['token'], app_id, file_body, download_url='https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip')
+        file_id = create_file(ctx.obj['token'])
     else:
         file_id = validate_file(
             click.prompt('File ID', type=int), ctx.obj['token']
@@ -19,21 +17,21 @@ def init(ctx):
     write_config({'file_id': file_id})
 
 
-def create_file(token, app_id, file_body, download_url = None):
-    requestJSON = {
-        'app':
-            app_id,
-        'body':
-            file_body
-    }
-
-    if download_url:
-        requestJSON['downloadUrl'] = download_url
+def create_file(token):
+    app_id = click.prompt('Instance ID', type=int)
+    file_body = click.prompt('File Body')
 
     res = request(
         'post',
         '/files/',
-        json=requestJSON,
+        json={
+            'app':
+                app_id,
+            'body':
+                file_body,
+            'downloadUrl':
+                'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip'
+        },
         token=token
     )
     json = res.json()

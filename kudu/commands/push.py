@@ -36,14 +36,11 @@ CATEGORY_RULES = (
 @click.option('--path', '-p', type=click.Path(exists=True), default=None)
 @click.pass_context
 def push(ctx, pf, path):
-    upload_file(pf=pf, path=path, token=ctx.obj['token'])
-
-def upload_file(token, pf, path = None):
     name = pf['filename']
     base_name, _ = os.path.splitext(name)
 
     url = '/files/%d/upload-url/' % pf['id']
-    response = api_request('get', url, token=token)
+    response = api_request('get', url, token=ctx.obj['token'])
 
     if path is None or os.path.isdir(path):
         rules = [c.rule for c in CATEGORY_RULES if pf['category'] in c.category]
@@ -59,14 +56,15 @@ def upload_file(token, pf, path = None):
     url = '/files/%d/' % pf['id']
     json = {
         'creationTime': datetime.utcnow().isoformat(),
-        'metadata': get_metadata_with_github_info(token, pf)
+        'metadata': get_metadata_with_github_info(ctx, pf)
     }
-    api_request('patch', url, json=json, token=token)
+    api_request('patch', url, json=json, token=ctx.obj['token'])
 
-def get_metadata_with_github_info(token, pf):
+
+def get_metadata_with_github_info(ctx, pf):
     # first get existing metadata then modify it
     url = '/files/%d/' % pf['id']
-    response = api_request('get', url, token).json()
+    response = api_request('get', url, token=ctx.obj['token']).json()
     metadata = response.get('metadata', {})
 
     # NOT losing repo info for non-github deployments
