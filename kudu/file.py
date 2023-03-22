@@ -21,22 +21,25 @@ CATEGORY_RULES = (
                  NameRule(r'(.+)', ('{base_name}', '{0}'))),
 ) # yapf: disable
 
-def upload_file(token, app_id, file_body, file_data, file_name, file_id = None):
+def upload_file(token, app_id, file_body, file_data, file_name, extension = 'zip'):
     multipart_form_data = {
-        'app': (None, app_id),
-        'body': (None, file_body),
+        'app':
+            (None, app_id),
+        'body':
+            (None, file_body),
         'file': (
-            file_name,
-            file_data,
+            '%s.%s' % (file_name, extension), 
+            file_data, 
             'application/octet-stream'
-        ),
-        'filename': (None, file_name)
+        )
     }
 
-    url = '/files/%s' % file_id + '/' if file_id else '/files/'
+    if file_name:
+        multipart_form_data['filename'] = (None, file_name)
+
     return handle_file_create_response(api_request(
-        'patch' if file_id else 'post',
-        url,
+        'post',
+        '/files/',
         files=multipart_form_data,
         token=token
     ))
@@ -59,7 +62,7 @@ def upload_file_from_url(token, app_id, file_body, download_url):
 def handle_file_create_response(res):
     resJson = res.json()
 
-    if res.status_code != 201 and res.status_code != 200:
+    if res.status_code != 201:
         if resJson.get('app'):
             click.echo('Invalid instance', err=True)
         else:
