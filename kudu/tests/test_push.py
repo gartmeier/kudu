@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from kudu.__main__ import cli
 from kudu.api import authenticate
 from kudu.api import request as api_request
-from kudu.file import CATEGORY_RULES
+from kudu.commands.push import CATEGORY_RULES
 from kudu.config import write_config
 from kudu.mkztemp import NameRule, mkztemp
 
