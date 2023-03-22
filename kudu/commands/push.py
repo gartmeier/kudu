@@ -42,28 +42,37 @@ def push(ctx, pf, path):
     url = '/files/%d/upload-url/' % pf['id']
     response = api_request('get', url, token=ctx.obj['token'])
 
+    data = get_file_data(path, base_name, pf['category'])
+
+    # upload data
+    requests.put(response.json(), data=data)
+    
+    # touch file
+    update_file_metadata(ctx, pf['id'])
+
+def get_file_data(path, base_name, category):
     if path is None or os.path.isdir(path):
-        rules = [c.rule for c in CATEGORY_RULES if pf['category'] in c.category]
+        rules = [c.rule for c in CATEGORY_RULES if category in c.category]
         fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
         data = os.fdopen(fp, 'r+b')
     else:
         data = open(path, 'r+b')
 
-    # upload data
-    requests.put(response.json(), data=data)
+    return data
 
+
+def update_file_metadata(ctx, file_id):
     # touch file
-    url = '/files/%d/' % pf['id']
+    url = '/files/%d/' % file_id
     json = {
         'creationTime': datetime.utcnow().isoformat(),
-        'metadata': get_metadata_with_github_info(ctx, pf)
+        'metadata': get_metadata_with_github_info(ctx, file_id)
     }
     api_request('patch', url, json=json, token=ctx.obj['token'])
 
-
-def get_metadata_with_github_info(ctx, pf):
+def get_metadata_with_github_info(ctx, file_id):
     # first get existing metadata then modify it
-    url = '/files/%d/' % pf['id']
+    url = '/files/%d/' % file_id
     response = api_request('get', url, token=ctx.obj['token']).json()
     metadata = response.get('metadata', {})
 
