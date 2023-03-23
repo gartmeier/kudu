@@ -1,17 +1,14 @@
 import click
-import os
-import json
+
 from kudu.api import request
 from kudu.config import write_config
-from kudu.file import upload_file_from_url
+
 
 @click.command()
 @click.pass_context
 def init(ctx):
     if click.confirm('Would you like to create a new file?'):
-        app_id = click.prompt('Instance ID', type=int)
-        file_body = click.prompt('File Body')
-        file_id = upload_file_from_url(ctx.obj['token'], app_id, file_body, download_url='https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip')
+        file_id = create_file(ctx.obj['token'])
     else:
         file_id = validate_file(
             click.prompt('File ID', type=int), ctx.obj['token']
@@ -19,6 +16,34 @@ def init(ctx):
 
     write_config({'file_id': file_id})
 
+
+def create_file(token):
+    app_id = click.prompt('Instance ID', type=int)
+    file_body = click.prompt('File Body')
+
+    res = request(
+        'post',
+        '/files/',
+        json={
+            'app':
+                app_id,
+            'body':
+                file_body,
+            'downloadUrl':
+                'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip'
+        },
+        token=token
+    )
+    json = res.json()
+
+    if res.status_code != 201:
+        if json.get('app'):
+            click.echo('Invalid instance', err=True)
+        else:
+            click.echo('Unknown error', err=True)
+        exit(1)
+
+    return json.get('id')
 
 
 def validate_file(file_id, token):

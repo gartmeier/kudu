@@ -1,12 +1,26 @@
 import os
-import time
+from collections import namedtuple
+from datetime import datetime
+
 import click
 import requests
 
 from kudu.api import request as api_request
 from kudu.config import ConfigOption
+from kudu.mkztemp import NameRule, mkztemp
 from kudu.types import PitcherFileType
-from kudu.file import get_file_data, update_file_metadata, upload_file
+
+CategoryRule = namedtuple('crule', ('category', 'rule'))
+
+
+CATEGORY_RULES = (
+    CategoryRule('',
+                 NameRule((r'^interface', r'(.+)'), ('{base_name}', '{0}'))),
+    CategoryRule(('presentation', 'zip'),
+                 NameRule(r'^thumbnail.png', '{base_name}.png')),
+    CategoryRule(('presentation', 'zip'),
+                 NameRule(r'(.+)', ('{base_name}', '{0}'))),
+) # yapf: disable
 
 
 @click.command()
@@ -16,25 +30,58 @@ from kudu.file import get_file_data, update_file_metadata, upload_file
     'pf',
     cls=ConfigOption,
     config_name='file_id',
-    required=False,
+    prompt=True,
     type=PitcherFileType(category=('zip', 'presentation', 'json', ''))
 )
 @click.option('--path', '-p', type=click.Path(exists=True), default=None)
-@click.option('--instance', '-i', type=int, required=False, help="instance id to upload file")
-@click.option('--body', '-b', type=str, required=False, help="Body of the file")
-@click.option('--filename', '-n', type=str, required=False, help="Name of the file in bucket")
-@click.option('--extension', '-e', type=str, required=False, default="zip", help="Extension of the file that's going to be uploaded, default 'zip'")
 @click.pass_context
-def push(ctx, pf, path, instance, body, filename, extension):
-    if pf:
-        create_or_update_file(ctx.obj['token'], filename=pf['filename'], path=path, file_id=pf['id'], category=pf['category'])
-    else:
-        if not instance or not body:
-            click.echo('instance and body should be provided when creating a new file', err=True)
-            exit(1)
-        create_or_update_file(ctx.obj['token'], filename=filename or '%s.%s' % (str(round(time.time() * 1000)), extension), path=path, body=body, instance=instance, category=extension)
+def push(ctx, pf, path):
+    name = pf['filename']
+    base_name, _ = os.path.splitext(name)
 
-def create_or_update_file(token, filename, path = None, file_id=None, body=None, instance=None, category = None):
-    file_data = get_file_data(filename=filename, category=category, path=path)
-    file_id = upload_file(token, instance, body, file_data=file_data, file_name=filename, file_id=file_id)
-    update_file_metadata(token, file_id)
+    url = '/files/%d/upload-url/' % pf['id']
+    response = api_request('get', url, token=ctx.obj['token'])
+
+    data = get_file_data(path, base_name, pf['category'])
+
+    # upload data
+    requests.put(response.json(), data=data)
+    
+    # touch file
+    update_file_metadata(ctx, pf['id'])
+
+def get_file_data(path, base_name, category):
+    if path is None or os.path.isdir(path):
+        rules = [c.rule for c in CATEGORY_RULES if category in c.category]
+        fp, _ = mkztemp(base_name, root_dir=path, name_rules=rules)
+        data = os.fdopen(fp, 'r+b')
+    else:
+        data = open(path, 'r+b')
+
+    return data
+
+
+def update_file_metadata(ctx, file_id):
+    # touch file
+    url = '/files/%d/' % file_id
+    json = {
+        'creationTime': datetime.utcnow().isoformat(),
+        'metadata': get_metadata_with_github_info(ctx, file_id)
+    }
+    api_request('patch', url, json=json, token=ctx.obj['token'])
+
+def get_metadata_with_github_info(ctx, file_id):
+    # first get existing metadata then modify it
+    url = '/files/%d/' % file_id
+    response = api_request('get', url, token=ctx.obj['token']).json()
+    metadata = response.get('metadata', {})
+
+    # NOT losing repo info for non-github deployments
+    current_repo_info = metadata.get('GITHUB_REPOSITORY', 'not_available') 
+    metadata['GITHUB_REPOSITORY'] = os.environ.get('GITHUB_REPOSITORY', current_repo_info)
+
+    # losing commit SHA and run id info for non-github deployments
+    metadata['GITHUB_SHA'] = os.environ.get('GITHUB_SHA', 'not_available')
+    metadata['GITHUB_RUN_ID'] = os.environ.get('GITHUB_RUN_ID', 'not_available')
+
+    return metadata

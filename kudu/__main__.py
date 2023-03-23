@@ -7,6 +7,7 @@ from kudu.commands.init import init
 from kudu.commands.link import link
 from kudu.commands.pull import pull
 from kudu.commands.push import push
+from kudu.commands.create import create
 from kudu.config import ConfigOption
 
 
@@ -39,6 +40,7 @@ cli.add_command(init)
 cli.add_command(pull)
 cli.add_command(push)
 cli.add_command(link)
+cli.add_command(create)
 
 if __name__ == '__main__':
     cli()
