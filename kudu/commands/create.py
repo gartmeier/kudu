@@ -38,7 +38,8 @@ def create_file(token, app_id, file_body, category, filename):
             'downloadUrl':
                 'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip',
             'category': category,
-            'filename': filename
+            'filename': filename,
+            'dont_convert': True
         },
         token=token
     )
