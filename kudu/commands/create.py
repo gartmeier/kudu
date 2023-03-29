@@ -25,21 +25,25 @@ def create(ctx, instance, body, filename = None, path = None, extension = "zip")
     update_file_metadata(ctx, file_id)
 
 
-def create_file(token, app_id, file_body, category, filename):
+def create_file(token, app_id, file_body, category, filename = None):
+    payload = {
+        'app':
+            app_id,
+        'body':
+            file_body,
+        'downloadUrl':
+            'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip',
+        'category': category,
+        'dont_convert': True
+    }
+
+    if filename:
+        payload['filename'] = filename
+    
     res = request(
         'post',
         '/files/',
-        json={
-            'app':
-                app_id,
-            'body':
-                file_body,
-            'downloadUrl':
-                'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip',
-            'category': category,
-            'filename': filename,
-            'dont_convert': True
-        },
+        json=payload,
         token=token
     )
     json = res.json()
