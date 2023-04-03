@@ -14,9 +14,8 @@ from kudu.commands.push import get_file_data, update_file_metadata
 @click.option('--extension', '-e', type=str, required=False, default="zip", help="Extension of the file that's going to be uploaded, default 'zip'")
 @click.pass_context
 def create(ctx, instance, body, filename = None, path = None, extension = "zip"):
-    base_name, _ = os.path.splitext(filename)
     file_data = get_file_data(path, filename or '%i%s' % (int(round(time.time() * 1000)), extension), category=extension)
-    file_id = create_file(ctx.obj['token'], instance, body, extension, filename=base_name)
+    file_id = create_file(ctx.obj['token'], instance, body, extension, filename=filename)
     url = '/files/%d/upload-url/' % file_id
     response = request('get', url, token=ctx.obj['token'])
     # upload data
@@ -26,21 +25,25 @@ def create(ctx, instance, body, filename = None, path = None, extension = "zip")
     update_file_metadata(ctx, file_id)
 
 
-def create_file(token, app_id, file_body, category, filename):
+def create_file(token, app_id, file_body, category, filename = None):
+    payload = {
+        'app':
+            app_id,
+        'body':
+            file_body,
+        'downloadUrl':
+            'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip',
+        'category': category,
+        'dont_convert': True
+    }
+
+    if filename:
+        payload['filename'] = filename
+    
     res = request(
         'post',
         '/files/',
-        json={
-            'app':
-                app_id,
-            'body':
-                file_body,
-            'downloadUrl':
-                'https://admin.pitcher.com/downloads/Pitcher%20HTML5%20Folder.zip',
-            'category': category,
-            'filename': filename,
-            'dont_convert': True
-        },
+        json=payload,
         token=token
     )
     json = res.json()
