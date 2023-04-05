@@ -14,7 +14,7 @@ from kudu.commands.push import get_file_data, update_file_metadata
 @click.option('--extension', '-e', type=str, required=False, default="zip", help="Extension of the file that's going to be uploaded, default 'zip'")
 @click.pass_context
 def create(ctx, instance, body, filename = None, path = None, extension = "zip"):
-    base_name, _ = os.path.splitext(filename or '%i.%s' % (int(round(time.time() * 1000)), extension))
+    base_name = os.path.splitext(filename)[0] if filename else str(int(round(time.time() * 1000)))
     
     file_data = get_file_data(path, base_name, category=extension)
     file_id = create_file(ctx.obj['token'], instance, body, extension, filename=filename)
