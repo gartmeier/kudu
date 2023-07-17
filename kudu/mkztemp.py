@@ -5,7 +5,6 @@ import zipfile
 
 
 class NameRule:
-
     def __init__(self, pattern, path):
         if not isinstance(pattern, str):
             pattern = os.path.join(*pattern)
@@ -26,8 +25,8 @@ def mkztemp(base_name, root_dir=None, base_dir=None, name_rules=None):
         base_dir = os.curdir
 
     try:
-        tmp_fd, tmp_name = tempfile.mkstemp('.zip')
-        zf = zipfile.ZipFile(tmp_name, 'w', zipfile.ZIP_DEFLATED)
+        tmp_fd, tmp_name = tempfile.mkstemp(".zip")
+        zf = zipfile.ZipFile(tmp_name, "w", zipfile.ZIP_DEFLATED)
 
         for root, dirs, files in os.walk(base_dir):
             arcroot = os.path.relpath(root)
@@ -42,9 +41,7 @@ def mkztemp(base_name, root_dir=None, base_dir=None, name_rules=None):
                     for rule in name_rules:
                         m = rule.pattern.match(arcname)
                         if m:
-                            arcname = rule.path.format(
-                                *m.groups(), base_name=base_name
-                            )
+                            arcname = rule.path.format(*m.groups(), base_name=base_name)
 
                 filename = os.path.join(root, name)
                 zf.write(filename, arcname)

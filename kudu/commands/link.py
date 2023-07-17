@@ -7,18 +7,19 @@ from shutil import copyfile
 
 import click
 from watchdog.events import (
-    EVENT_TYPE_CREATED, EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED,
-    FileSystemEventHandler
+    EVENT_TYPE_CREATED,
+    EVENT_TYPE_MODIFIED,
+    EVENT_TYPE_MOVED,
+    FileSystemEventHandler,
 )
 from watchdog.observers import Observer
 
-from kudu.config import ConfigOption
+from kudu.config import default_file_id
 from kudu.defaults import default_pitcher_folders
 from kudu.types import PitcherFileType
 
 
 class PitcherFilePathConverter(object):
-
     def __init__(self, pfile):
         self.pfile = pfile
 
@@ -27,44 +28,49 @@ class PitcherFilePathConverter(object):
 
 
 class InteractivePathConverter(PitcherFilePathConverter):
-    basedir = 'zip'
+    basedir = "zip"
 
     def convert(self, relpath):
-        dirname = splitext(self.pfile['filename'])[0]
-        if fnmatch(relpath, 'thumbnail.png'):
-            relpath = dirname + '.png'
+        dirname = splitext(self.pfile["filename"])[0]
+        if fnmatch(relpath, "thumbnail.png"):
+            relpath = dirname + ".png"
         return join(self.basedir, dirname, relpath)
 
 
 class PresentationPathConverter(InteractivePathConverter):
-    basedir = 'slides'
+    basedir = "slides"
 
     def convert(self, relpath):
-        if fnmatch(relpath, join('iPadOnly', '*')):
+        if fnmatch(relpath, join("iPadOnly", "*")):
             relpath = os.sep.join(split(relpath)[1:])
         return super(PresentationPathConverter, self).convert(relpath)
 
 
 class InterfacePathConverter(PitcherFilePathConverter):
-
     def convert(self, relpath):
-        if fnmatch(relpath, join('interface', '*')):
-            dirname = splitext(self.pfile['filename'])[0]
+        if fnmatch(relpath, join("interface", "*")):
+            dirname = splitext(self.pfile["filename"])[0]
             relpath = join(dirname, *split(relpath)[1:])
         return relpath
 
 
 class CopyFilesEventHandler(FileSystemEventHandler):
-
     def __init__(self, src, dst, converter):
         self.src = src
         self.dst = dst
         self.converter = converter
 
     def on_any_event(self, event):
-        if event.event_type in [EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED,
-                                EVENT_TYPE_CREATED] and not event.is_directory:
-            src_path = event.src_path if event.event_type != EVENT_TYPE_MOVED else event.dest_path
+        if (
+            event.event_type
+            in [EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, EVENT_TYPE_CREATED]
+            and not event.is_directory
+        ):
+            src_path = (
+                event.src_path
+                if event.event_type != EVENT_TYPE_MOVED
+                else event.dest_path
+            )
             src_relpath = os.path.relpath(src_path)
 
             dst_relpath = self.converter.convert(src_relpath)
@@ -87,14 +93,14 @@ class CopyFilesEventHandler(FileSystemEventHandler):
 
 
 def countfiles(top):
-    click.echo('Counting files', nl=False)
+    click.echo("Counting files", nl=False)
 
     count = 0
     for root, dirs, files in os.walk(top):
         count += len(files)
-        click.echo('\rCounting files: %d' % count, nl=False)
+        click.echo("\rCounting files: %d" % count, nl=False)
 
-    click.echo('\rCounting files: %d, done.' % count)
+    click.echo("\rCounting files: %d, done." % count)
     return count
 
 
@@ -105,13 +111,12 @@ def copyfiles(src, dst, converter):
     if not os.path.exists(dst):
         os.makedirs(dst, 0o755)
 
-    click.echo('Copying files', nl=False)
+    click.echo("Copying files", nl=False)
 
     for root, dirs, files in os.walk(src):
-
         for name in files:
             curr += 1
-            click.echo('\rCopying files: %d/%d' % (curr, total), nl=False)
+            click.echo("\rCopying files: %d/%d" % (curr, total), nl=False)
 
             src_path = os.path.join(root, name)
             src_relpath = os.path.relpath(src_path)
@@ -125,7 +130,7 @@ def copyfiles(src, dst, converter):
 
             copyfile(join(root, name), dst_path)
 
-    click.echo('\rCopying files: %d/%d, done.' % (curr, total))
+    click.echo("\rCopying files: %d/%d, done." % (curr, total))
 
 
 def watchfiles(src, dst, converter):
@@ -143,31 +148,28 @@ def watchfiles(src, dst, converter):
 
 @click.command()
 @click.option(
-    '--file',
-    '-f',
-    'pfile',
-    cls=ConfigOption,
-    config_name='file_id',
+    "--file",
+    "-f",
+    "pfile",
     prompt=True,
-    type=PitcherFileType(category=['zip', 'presentation', ''])
+    type=PitcherFileType(category=["zip", "presentation", ""]),
+    default=default_file_id,
 )
 @click.option(
-    '--pitcher-folders',
-    '-pf',
-    cls=ConfigOption,
-    config_name='pitcher_folders',
+    "--pitcher-folders",
+    "-pf",
     prompt=True,
+    type=click.Path(exists=True, file_okay=False, writable=True),
     default=lambda: default_pitcher_folders(),
-    type=click.Path(exists=True, file_okay=False, writable=True)
 )
 def link(pfile, pitcher_folders):
     cwd = getcwd()
 
-    if pfile['category'] == 'zip':
+    if pfile["category"] == "zip":
         converter = InteractivePathConverter(pfile)
-    elif pfile['category'] == 'presentation':
+    elif pfile["category"] == "presentation":
         converter = PresentationPathConverter(pfile)
-    elif pfile['category'] == '':
+    elif pfile["category"] == "":
         converter = InterfacePathConverter(pfile)
     else:
         raise NotImplementedError()

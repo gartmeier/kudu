@@ -3,37 +3,41 @@
 import click
 
 from kudu.api import authenticate
+from kudu.commands.create import create
 from kudu.commands.init import init
 from kudu.commands.link import link
 from kudu.commands.pull import pull
 from kudu.commands.push import push
-from kudu.commands.create import create
-from kudu.config import ConfigOption
+from kudu.config import default_password, default_token, default_username
 
 
 @click.group()
 @click.option(
-    '--username', '-u', cls=ConfigOption, prompt=True, envvar='KUDU_USERNAME'
+    "--username",
+    "-u",
+    prompt=True,
+    envvar="KUDU_USERNAME",
+    default=default_username,
 )
 @click.option(
-    '--password',
-    '-p',
-    cls=ConfigOption,
+    "--password",
+    "-p",
     prompt=True,
     hide_input=True,
-    envvar='KUDU_PASSWORD'
+    envvar="KUDU_PASSWORD",
+    default=default_password,
 )
-@click.option('--token', '-t', cls=ConfigOption, envvar='KUDU_TOKEN')
+@click.option("--token", "-t", envvar="KUDU_TOKEN", default=default_token)
 @click.pass_context
 def cli(ctx, username, password, token):
     if not token:
         try:
             token = authenticate(username, password)
         except ValueError:
-            click.echo('Invalid username or password', err=True)
+            click.echo("Invalid username or password", err=True)
             exit(1)
 
-    ctx.obj = {'username': username, 'password': password, 'token': token}
+    ctx.obj = {"username": username, "password": password, "token": token}
 
 
 cli.add_command(init)
@@ -42,5 +46,5 @@ cli.add_command(push)
 cli.add_command(link)
 cli.add_command(create)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
